@@ -1,0 +1,6 @@
+{
+  "type": "added",
+  "description": "Windows Kubernetes training with eight guided lessons, three troubleshooting incidents, verified local setup/cleanup scripts, and a web dashboard that runs PowerShell actions with live progress.",
+  "issues": [3],
+  "breaking": false
+}

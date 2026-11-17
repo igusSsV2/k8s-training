@@ -5,6 +5,7 @@ const path = require('node:path');
 test('run, stream steps, prevent overlap, and restore an operation after refresh', async ({page}) => {
   await page.goto('/');
   await expect(page.getByText('Local service connected')).toBeVisible();
+  await expect(page.locator('#release-notes')).toHaveText('Development · Change history');
   await page.getByRole('button', {name: 'Check prerequisites', exact: true}).click();
   await expect(page.locator('#operation-step')).toHaveText('Checking Docker Linux engine');
   await expect(page.getByRole('button', {name: 'Install prerequisites', exact: true})).toBeDisabled();

@@ -9,9 +9,12 @@
   "scripts": {
     "start": "node server/index.cjs",
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check server/actions.cjs && node --check server/operations.cjs && node --check server/index.cjs && node --check dist/control.js && node --check dist/app.js && node --check dist/course.js",
+    "check": "node scripts/check.cjs",
     "sync-course": "node training/scripts/Sync-Course.cjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "package:preview": "node scripts/release/preview.cjs",
+    "release:validate-pr": "node scripts/release/validate-pr.cjs",
+    "release:publish": "node scripts/release/publish.cjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1"

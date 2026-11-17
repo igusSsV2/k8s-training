@@ -40,6 +40,17 @@ function createApp({operations = new Operations({root})} = {}) {
     try { url = new URL(request.url, origin); } catch { return json(400, {error: 'Invalid URL.'}); }
     try {
       if (request.method === 'GET' && url.pathname === '/api/health') return json(200, {application: 'kube-together', instance});
+      if (request.method === 'GET' && url.pathname === '/api/version') {
+        const releaseFile = path.join(root, 'release.json');
+        const release = fs.existsSync(releaseFile) ? JSON.parse(fs.readFileSync(releaseFile, 'utf8')) : null;
+        const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+        return json(200, {version: release?.version || manifest.version, channel: release ? release.published ? 'release' : 'preview' : 'development', changelog: '/changelog'});
+      }
+      if (request.method === 'GET' && url.pathname === '/changelog') {
+        response.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+        fs.createReadStream(path.join(root, 'CHANGELOG.md')).on('error', () => response.destroy()).pipe(response);
+        return;
+      }
       if (request.method === 'GET' && url.pathname === '/api/session') return json(200, {
         token, actions: actions.map(({id, title, scenario, state, destructive}) => ({id, title, scenario: !!scenario, state: !!state, destructive: !!destructive})),
         operation: operations.snapshot()
