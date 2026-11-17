@@ -39,8 +39,14 @@ dependency PRs too: routine maintenance generally uses `patch`.
 
 ## What runs on GitHub
 
-**Validate application** runs on PR changes (including label changes), pushes to
-`main`, or a manual dispatch. Its PR checks are:
+**Validate release metadata** runs the fast label/changelog check on PR creation,
+code/metadata updates and label changes. Its concurrency group is separate from
+code validation, so a label change cannot cancel a running code test.
+
+**Validate application** runs on PR creation/code changes/reopening/readiness,
+base-branch edits, pushes to `main`, or a manual dispatch. Title/body edits may
+produce a skipped run, isolated from the active code-validation concurrency group.
+It does not subscribe to label events. Together the workflows provide:
 
 - **Release label and changelog**: exactly one bump label and a valid new change entry.
 - **Windows tests**: locked dependencies, syntax, unit/regression tests, browser
@@ -50,6 +56,11 @@ dependency PRs too: routine maintenance generally uses `patch`.
 
 PR artifacts are previews, not published releases. They expire after seven days.
 The preview version may change if another PR is released before merge.
+The preview job reads the current PR labels after tests finish, rather than a
+possibly label-free creation event. If a valid label is added only after packaging
+has already failed, rerun that failed application-validation run manually; label
+changes deliberately do not launch another full test/package run. The latest fast
+metadata check must also pass before merge.
 
 **Publish versioned release** runs after a push/merge to `main` and can be rerun
 manually from Actions. It processes all merged PRs after the release baseline in
