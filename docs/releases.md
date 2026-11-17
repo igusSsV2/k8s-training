@@ -138,6 +138,15 @@ only to the publisher. Checkout credentials are not persisted. No long-lived PAT
 or secret needs to be committed. Repo Actions must be enabled and permitted to
 write release contents; organization policy can still restrict that grant.
 
+The publisher pins REST API version `2022-11-28` because exact merge identity
+depends on `merge_commit_sha`. The `2026-03-10` contract removes that field from
+PR responses and caused the first post-merge run to reject PR #16 incorrectly
+(issue #19). A missing field now reports a schema/contract error, separately from
+a genuine unmatched commit. Empty association results are retried three times
+with short backoff before rejecting the commit. After merging the fix, dispatch
+the publisher on `main` (or let the merge push trigger it); it catches up with
+PR #16 and subsequent merges without forcing tags or changing history.
+
 ## Local validation
 
 ```powershell

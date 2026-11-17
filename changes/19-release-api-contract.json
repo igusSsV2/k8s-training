@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Use the GitHub REST contract that includes merge_commit_sha so merged PRs can be identified for release publication. Report missing schema fields clearly and retry briefly when association data is temporarily unavailable.",
+  "issues": [19],
+  "breaking": false
+}
