@@ -16,6 +16,16 @@ continue the existing issue and pull request until that work is complete.
 If GitHub authentication or permissions prevent a step, finish independent local
 work and report the precise blocker without claiming the remote action succeeded.
 
+## Documentation and release history
+
+Documentation is part of completing every implemented issue and release:
+
+- Update relevant README/setup, usage, configuration, troubleshooting, and test instructions in the same implementation PR. Keep commands, examples, and screenshots consistent with the delivered behavior.
+- Include a user-facing change summary and links to the issue/PR. Once the changelog workflow in #10 exists, add its required entry or fragment; until then, include the summary in the PR description.
+- If a change does not affect documentation, explain why in the PR rather than silently omitting it.
+- Before a release, verify that the packaged documentation, prerequisites, launch/update instructions, known limitations, migration notes, and breaking changes describe that exact release.
+- Implement release automation (#4) and versioned changelog work (#10) together, using shared version metadata for tags, package names, packaged versions, changelog sections, and GitHub Release notes.
+
 ## Project and checks
 
 Run commands from this repository's root. The dashboard is in `dist/`, guided
