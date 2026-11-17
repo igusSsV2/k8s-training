@@ -44,9 +44,8 @@ code/metadata updates and label changes. Its concurrency group is separate from
 code validation, so a label change cannot cancel a running code test.
 
 **Validate application** runs on PR creation/code changes/reopening/readiness,
-base-branch edits, pushes to `main`, or a manual dispatch. Title/body edits may
-produce a skipped run, isolated from the active code-validation concurrency group.
-It does not subscribe to label events. Together the workflows provide:
+pushes to `main`, or a manual dispatch. It does not subscribe to label or title/body
+edit events. Together the workflows provide:
 
 - **Release label and changelog**: exactly one bump label and a valid new change entry.
 - **Windows tests**: locked dependencies, syntax, unit/regression tests, browser
@@ -61,6 +60,8 @@ possibly label-free creation event. If a valid label is added only after packagi
 has already failed, rerun that failed application-validation run manually; label
 changes deliberately do not launch another full test/package run. The latest fast
 metadata check must also pass before merge.
+If a PR is retargeted to a different base, push a new commit or rerun its application
+validation explicitly. Metadata edits never replace code checks with skipped jobs.
 
 **Publish versioned release** runs after a push/merge to `main` and can be rerun
 manually from Actions. It processes all merged PRs after the release baseline in

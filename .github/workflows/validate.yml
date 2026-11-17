@@ -3,7 +3,7 @@ name: Validate application
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review, edited]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
   workflow_dispatch:
@@ -12,14 +12,12 @@ permissions:
   contents: read
 
 concurrency:
-  # Title/body edits may produce a skipped run but must not cancel code checks.
-  group: validation-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action == 'edited' && !github.event.changes.base && 'metadata' || 'code' }}
+  group: validation-${{ github.event.pull_request.number || github.ref }}-code
   cancel-in-progress: true
 
 jobs:
   tests:
     name: Windows tests
-    if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -48,7 +46,7 @@ jobs:
 
   package-preview:
     name: Windows ZIP smoke test
-    if: github.event_name == 'pull_request' && (github.event.action != 'edited' || github.event.changes.base != null)
+    if: github.event_name == 'pull_request'
     needs: [tests]
     permissions:
       contents: read
