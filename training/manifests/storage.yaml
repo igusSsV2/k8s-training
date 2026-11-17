@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: journal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 64Mi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: write-journal
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: writer
+          image: busybox:1.37.0
+          command: ["sh", "-c", "echo learned-together > /data/note; cat /data/note"]
+          volumeMounts:
+            - name: journal
+              mountPath: /data
+      volumes:
+        - name: journal
+          persistentVolumeClaim:
+            claimName: journal
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: journal-reader
+spec:
+  containers:
+    - name: reader
+      image: busybox:1.37.0
+      command: ["sh", "-c", "sleep 86400"]
+      volumeMounts:
+        - name: journal
+          mountPath: /data
+  volumes:
+    - name: journal
+      persistentVolumeClaim:
+        claimName: journal

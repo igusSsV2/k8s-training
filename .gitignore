@@ -1,0 +1,10 @@
+.tools/
+.openai/
+node_modules/
+.env
+.env.*
+!.env.example
+kubeconfig
+kubeconfig.*
+*.pem
+*.key
