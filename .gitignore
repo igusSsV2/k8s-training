@@ -8,3 +8,5 @@ kubeconfig
 kubeconfig.*
 *.pem
 *.key
+playwright-report/
+test-results/

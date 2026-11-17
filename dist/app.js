@@ -23,12 +23,12 @@ function render() {
   $('resume').textContent=done===8?'Revisit your journey ?':done?'Continue your journey ?':'Start your first lab ?';
   $('milestone').textContent=done===8?'You built this.':next===0?'Hello, cluster.':titles[next];
   $('milestoneSub').textContent=done===8?'Eight labs complete. Keep exploring.':'Next up: lab '+String(next+1).padStart(2,'0');
-  $('roles').textContent='Learner '+(state.driver+1)+' drives � Learner '+(2-state.driver)+' navigates';
+  $('roles').textContent='Learner '+(state.driver+1)+' drives · Learner '+(2-state.driver)+' navigates';
   $('grid').replaceChildren();
   titles.forEach((title,i)=>{
     const card=document.createElement('button');card.className='card';
     const started=record(i).checks.some(Boolean)||record(i).notes;
-    card.innerHTML='<div class="cardtop"><span class="icon">'+icons[i]+'</span><span class="badge '+(complete(i)?'done':'')+'">'+(complete(i)?'? Completed':started?'In progress':'Ready to explore')+'</span></div><h3>'+title+'</h3><p>'+descriptions[i]+'</p><div class="cardfoot"><span>LAB '+String(i+1).padStart(2,'0')+' � 60�90 MIN</span><b>'+(complete(i)?'Revisit lab':'Open lab')+' ?</b></div>';
+    card.innerHTML='<div class="cardtop"><span class="icon">'+icons[i]+'</span><span class="badge '+(complete(i)?'done':'')+'">'+(complete(i)?'? Completed':started?'In progress':'Ready to explore')+'</span></div><h3>'+title+'</h3><p>'+descriptions[i]+'</p><div class="cardfoot"><span>LAB '+String(i+1).padStart(2,'0')+' · 60–90 MIN</span><b>'+(complete(i)?'Revisit lab':'Open lab')+' ?</b></div>';
     card.onclick=()=>openLab(i);$('grid').append(card);
   });
 }
@@ -70,5 +70,5 @@ $('journey').onclick=()=>$('grid').scrollIntoView({behavior:'smooth'});
 $('setup').onclick=()=>{$('labtag').textContent='BEFORE YOU BEGIN';$('title').textContent='Make room for your cluster.';$('content').replaceChildren(markdown(COURSE.setup));$('tracking').hidden=true;$('modal').showModal();$('modal').scrollTop=0;};
 $('coach').onclick=()=>copy('Read training/README.md and training/labs/'+String(selected+1).padStart(2,'0')+'.md. We are two beginners working through '+titles[selected]+'. Explain the concept briefly, then ask us to predict the first result. Give one hint at a time. Do not execute tasks or show the full solution unless asked. Alternate questions between us. Use only context kind-k8training and namespace k8training.');
 $('export').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kube-together-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('import').onchange=async event=>{try{const value=JSON.parse(await event.target.files[0].text());if(![0,1].includes(value.learner)||![0,1].includes(value.driver)||!Array.isArray(value.records)||value.records.length!==2)throw Error();for(const records of value.records){if(!records||typeof records!=='object')throw Error();for(const [k,r]of Object.entries(records)){if(!/^[0-7]$/.test(k)||!Array.isArray(r.checks)||r.checks.length!==4||r.checks.some(v=>typeof v!=='boolean')||typeof r.notes!=='string')throw Error();}}if(confirm('Replace this browser�s progress with the imported backup?')){state=value;save();render();toast('Progress restored.');}}catch{toast('Could not import: choose a valid progress backup.');}event.target.value='';};
+$('import').onchange=async event=>{try{const value=JSON.parse(await event.target.files[0].text());if(![0,1].includes(value.learner)||![0,1].includes(value.driver)||!Array.isArray(value.records)||value.records.length!==2)throw Error();for(const records of value.records){if(!records||typeof records!=='object')throw Error();for(const [k,r]of Object.entries(records)){if(!/^[0-7]$/.test(k)||!Array.isArray(r.checks)||r.checks.length!==4||r.checks.some(v=>typeof v!=='boolean')||typeof r.notes!=='string')throw Error();}}if(confirm('Replace this browser’s progress with the imported backup?')){state=value;save();render();toast('Progress restored.');}}catch{toast('Could not import: choose a valid progress backup.');}event.target.value='';};
 render();

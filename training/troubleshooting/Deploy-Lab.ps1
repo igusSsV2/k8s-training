@@ -3,16 +3,19 @@ param(
 )
 . "$PSScriptRoot/Common.ps1"
 try {
+    Write-LabStep 'Checking Docker before deployment'
     $null = New-Item -ItemType Directory -Path $ToolsRoot -Force
     $os = (Invoke-LabTool docker @('info', '--format', '{{.OSType}}')) -join ''
     Assert-Lab ($os.Trim() -eq 'linux') 'Docker daemon runs Linux containers'
     $clusters = @(Invoke-LabTool kind @('get', 'clusters'))
     if ($clusters -notcontains $ClusterName) {
+        Write-LabStep 'Creating the dedicated Kubernetes cluster'
         $null = Invoke-LabTool kind @('create', 'cluster', '--name', $ClusterName, '--image', $NodeImage,
             '--kubeconfig', $Kubeconfig, '--wait', '180s')
     }
     Assert-LabCluster
     foreach ($number in (Get-Scenarios $Scenario)) {
+        Write-LabStep "Deploying the healthy baseline for scenario $number"
         $ns = "trouble-$number"
         Assert-OwnedNamespace $ns -AllowMissing
         $null = Apply-LabJson @{
@@ -25,7 +28,9 @@ try {
         } $ns
         $null = Invoke-LabKube @('-n', $ns, 'rollout', 'restart', 'deployment/web')
         $null = Invoke-LabKube @('-n', $ns, 'rollout', 'status', 'deployment/web', '--timeout=180s')
+        Write-LabStep "Verifying scenario $number baseline over HTTP"
         Test-LabHttp $number
+        Write-LabStep "Preparing scenario $number for troubleshooting"
         Set-LabFault $number
     }
     & "$PSScriptRoot/Check-Lab.ps1" -Scenario $Scenario -State Broken
@@ -33,4 +38,4 @@ try {
     Write-Host 'Labs are deployed and deliberately broken. Read README.md for your incident briefs.'
     exit 0
 }
-catch { Write-Error $_.Exception.Message -ErrorAction Continue; exit 1 }
+catch { Write-LabError $_.Exception.Message; exit 1 }
