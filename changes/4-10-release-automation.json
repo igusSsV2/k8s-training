@@ -1,6 +1,6 @@
 {
   "type": "added",
-  "description": "Label-driven semantic versions, validated Windows ZIP releases, SHA-256 checksums, and a dated changelog generated from reviewed change entries. Document release recovery and contribution requirements.",
+  "description": "Label-driven semantic versions, validated Windows ZIP releases, SHA-256 checksums, and a dated changelog generated from reviewed change entries. Label-only changes run lightweight metadata checks without restarting code tests. Document release recovery and contribution requirements.",
   "issues": [4, 10],
   "breaking": false
 }
