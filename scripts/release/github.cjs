@@ -1,0 +1,30 @@
+class GitHub {
+  constructor({repository, token, fetchRequest = fetch}) {
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repository) || !token) throw new Error('GitHub repository and token are required.');
+    this.repository = repository;
+    this.token = token;
+    this.fetchRequest = fetchRequest;
+  }
+
+  async request(route, {method = 'GET', body, bytes, contentType = 'application/json', optional = false} = {}) {
+    const url = route.startsWith('https://uploads.github.com/') ? route : `https://api.github.com/repos/${this.repository}/${route}`;
+    const response = await this.fetchRequest(url, {
+      method, headers: {Authorization: `Bearer ${this.token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2026-03-10', 'User-Agent': 'k8s-training-release', ...(body || bytes ? {'Content-Type': contentType} : {})},
+      ...(bytes ? {body: bytes} : body ? {body: JSON.stringify(body)} : {}), signal: AbortSignal.timeout(60000)
+    });
+    if (optional && response.status === 404) return null;
+    if (!response.ok) throw new Error(`GitHub ${method} request failed (${response.status}) for ${route.split('?')[0]}.`);
+    return response.status === 204 ? null : response.json();
+  }
+
+  async list(route) {
+    const items = [];
+    for (let page = 1; ; page++) {
+      const batch = await this.request(`${route}${route.includes('?') ? '&' : '?'}per_page=100&page=${page}`);
+      items.push(...batch);
+      if (batch.length < 100) return items;
+    }
+  }
+}
+
+module.exports = {GitHub};

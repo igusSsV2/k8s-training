@@ -99,6 +99,10 @@ test('HTTP enforces local host/origin/token, validates actions and replays activ
   t.after(() => { app.closeStreams(); app.server.closeAllConnections(); app.server.close(); });
   const origin = `http://127.0.0.1:${app.server.address().port}`;
   const session = await (await fetch(`${origin}/api/session`)).json();
+  const version = await (await fetch(`${origin}/api/version`)).json();
+  assert.equal(version.channel, 'development');
+  assert.equal(version.changelog, '/changelog');
+  assert.match(await (await fetch(`${origin}/changelog`)).text(), /# Changelog/);
   const headers = {'Content-Type': 'application/json', Origin: origin, 'X-Lab-Token': session.token};
   assert.equal((await fetch(`${origin}/.tools/kubeconfig`)).status, 404);
   const invalidHost = await new Promise((resolve, reject) => {

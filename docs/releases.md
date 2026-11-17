@@ -1,0 +1,155 @@
+# Releases and change history
+
+## Contributor workflow
+
+Every implementation PR targeting `main` needs exactly one of `major`, `minor`,
+or `patch`, plus a new reviewed `changes/<issue>-description.json` file:
+
+```json
+{
+  "type": "fixed",
+  "description": "Explain the user-visible change and any required action.",
+  "issues": [4],
+  "breaking": false
+}
+```
+
+Supported types are `added`, `changed`, `fixed`, `removed`, `deprecated`, and
+`security`. Set `breaking` to true for a breaking change and describe migration
+steps in the entry and relevant documentation. Never edit or reuse an already
+merged entry for a different change; add another file. Unrelated labels may
+coexist with the single bump label.
+
+| Label | Previous 1.2.3 | Result |
+| --- | --- | --- |
+| `major` | 1.2.3 | 2.0.0 |
+| `minor` | 1.2.3 | 1.3.0 |
+| `patch` | 1.2.3 | 1.2.4 |
+
+`release-policy.json` anchors the start of automation at the final commit before
+these workflows were introduced. Earlier training work is described accurately
+in the initial entries and ships in the first release. The version baseline is
+`0.0.0`; a first `minor` PR produces `v0.1.0`. The development package.json version
+does not allocate release numbers. Release tags and frozen release metadata are
+the version source of truth. Do not create or move release tags manually.
+
+Update affected instructions and screenshots in each PR, or explain why they are
+unaffected. See [AGENTS.md](../AGENTS.md). These rules apply to documentation and
+dependency PRs too: routine maintenance generally uses `patch`.
+
+## What runs on GitHub
+
+**Validate application** runs on PR changes (including label changes), pushes to
+`main`, or a manual dispatch. Its PR checks are:
+
+- **Release label and changelog**: exactly one bump label and a valid new change entry.
+- **Windows tests**: locked dependencies, syntax, unit/regression tests, browser
+  tests, PowerShell/course checks, and an extracted-package startup test.
+- **Windows ZIP smoke test**: build a preview ZIP and checksum, extract it, launch
+  the local service, verify its frontend/version, and stop the test service.
+
+PR artifacts are previews, not published releases. They expire after seven days.
+The preview version may change if another PR is released before merge.
+
+**Publish versioned release** runs after a push/merge to `main` and can be rerun
+manually from Actions. It processes all merged PRs after the release baseline in
+Git ancestry order, including merges that arrived while another run was active.
+One publisher runs at a time; coalescing pending triggers cannot lose a PR because
+each run drains all unreleased merges, not just the triggering commit.
+
+For each unreleased PR, the publisher validates its label/entry, extracts the exact
+merged commit into a clean workspace, runs the Windows validation suites, builds
+and smoke-tests the package, and only then creates or resumes its tagged draft.
+It uploads all assets before publishing. Closing an unmerged PR never releases it.
+A direct commit to `main` without a merged PR stops publishing with an actionable
+error; it is not assigned an invented release label.
+
+Required-check enforcement is a separate repository setting. Configure the three
+check names above when branch protection is available (issue #6/#15). On a private
+repository whose plan does not permit branch protection, checks still run and the
+publisher independently rejects missing/ambiguous labels and failing validation.
+Do not describe an unprotected branch as merge-protected.
+
+## Download and launch
+
+On the repository's Releases page, download:
+
+- `k8s-training-vX.Y.Z-windows-x64.zip`
+- The matching `.zip.sha256` file.
+- Optionally the standalone `CHANGELOG.md` asset (also inside the ZIP).
+
+Private-repository downloads require authorized GitHub access. The application
+currently supports Windows x64; macOS/Linux support is tracked in issue #12.
+
+Verify and extract from a PowerShell terminal, replacing the example version:
+
+```powershell
+Get-FileHash .\k8s-training-v0.1.0-windows-x64.zip -Algorithm SHA256
+Get-Content .\k8s-training-v0.1.0-windows-x64.zip.sha256
+# Compare the hash values before extracting.
+Expand-Archive .\k8s-training-v0.1.0-windows-x64.zip -DestinationPath .\release-v0.1.0
+cd .\release-v0.1.0\k8s-training
+powershell -NoProfile -File Start-K8Training.ps1
+```
+
+Node.js 22+ is a host prerequisite. No npm install is needed to run a release;
+runtime uses Node built-ins. Lab setup still needs Docker/WSL as documented in the
+README. Source-development test commands require a Git checkout; release ZIPs
+contain runtime code, launchers, course/scripts, documentation, generated version
+metadata and history, but exclude development dependencies/tests and local data.
+
+The website's **Change history** link opens the complete changelog shipped with
+that installation. Development checkouts and PR previews are labelled separately
+from published versions. There is no automatic updater yet (issue #5).
+
+## Changelog ownership
+
+`changes/` holds immutable reviewed entries. GitHub Release notes record one
+version's changes with its PR/issues and frozen version identity. Every release
+ZIP and standalone `CHANGELOG.md` asset contains cumulative dated sections for
+all releases through that version, newest first.
+
+The checked-in root `CHANGELOG.md` is an index and unversioned baseline summary.
+Published dated history is generated into release assets, rather than committing
+generated version changes directly to `main` or inventing release dates in a PR.
+The date in each generated section is the merged PR's UTC date; GitHub separately
+shows when the release was actually published. This keeps retries consistent.
+
+## Failure recovery
+
+1. Open the failed Actions run and inspect the failing step. Nothing is published
+   if validation or package startup fails.
+2. If a merged PR lacks a bump label, add exactly one appropriate label to that PR,
+   then rerun **Publish versioned release** on `main`.
+3. A merged PR with no valid new change entry requires a corrective PR/source fix;
+   do not invent historical notes or edit tags to force publication. The release
+   range must be repaired deliberately before retrying.
+4. A failure during upload leaves a draft. A retry recognizes the same PR, commit,
+   previous version and version number, rebuilds/validates, replaces only that
+   identified draft's partial assets, then publishes it. It does not bump again.
+5. Published releases are skipped after verifying their tag identity and required
+   assets. Existing published assets and conflicting tags are never overwritten.
+   Investigate any identity/tag conflict before retrying; no force-push recovery.
+6. If the concurrency pending-trigger limit cancels a trigger, dispatch the
+   publisher manually; it catches up from the complete merge history.
+
+GitHub supplies an ephemeral job token with `contents: write` and PR read access
+only to the publisher. Checkout credentials are not persisted. No long-lived PAT
+or secret needs to be committed. Repo Actions must be enabled and permitted to
+write release contents; organization policy can still restrict that grant.
+
+## Local validation
+
+```powershell
+npm ci --ignore-scripts
+npx playwright install chromium
+npm run check
+npm test
+npm run test:browser
+npm run package:preview
+```
+
+Local previews default to a patch above the newest reachable stable tag (or
+`0.0.0`) and write into a fresh ignored `.tools/package-preview-*` directory. They
+do not create tags or GitHub Releases. The Windows package smoke test uses a
+temporary directory and port; it does not run lab setup or delete real clusters.

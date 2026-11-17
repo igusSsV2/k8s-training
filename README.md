@@ -9,8 +9,17 @@ targeting `main`. See [repository instructions](AGENTS.md) for details.
 Every implementation PR must update the affected documentation, commands,
 examples and screenshots, or explain why documentation is unchanged. Include a
 user-facing change summary; the versioned changelog/release workflow is tracked
-in #4 and #10. Each release must package documentation matching its actual
+in [the release guide](docs/releases.md). Each release must package documentation matching its actual
 version, prerequisites, launch/update flow, limitations and migration notes.
+
+## Download a versioned release
+
+Use the [Releases page](https://github.com/igusSsV2/k8s-training/releases) for the
+Windows x64 ZIP, SHA-256 checksum, and cumulative changelog. Releases become
+available when the automated release workflow is merged and completes successfully.
+See [release labels, changelog entries, CI checks and recovery](docs/releases.md).
+Every PR to `main` needs exactly one `major`/`minor`/`patch` label and a new reviewed
+entry in `changes/`. The first release starts from the `0.0.0` baseline.
 
 ## Launch the management webpage
 
@@ -128,6 +137,9 @@ controls execute the standalone troubleshooting scripts through the local servic
 - `training/troubleshooting/`: prerequisite, setup, deployment, check and cleanup scripts.
 - `tests/`: dashboard regression tests using Node's built-in runner.
 - `server/`: local HTTP/SSE service and predefined PowerShell action runner.
+- `scripts/release/`: version planning, package validation and release publishing.
+- `changes/`: reviewed source entries for versioned change history.
+- `.github/workflows/`: PR validation and post-merge release automation.
 
 Runtime uses only built-in Node modules. Development/browser checks use the
 locked Playwright dependency. Install test dependencies and Chromium once:

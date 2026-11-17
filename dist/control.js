@@ -85,6 +85,12 @@
       const session = await response.json();
       token = session.token;
       operation = session.operation;
+      const versionResponse = await fetch('/api/version');
+      if (versionResponse.ok) {
+        const version = await versionResponse.json();
+        byId('release-notes').textContent = `${version.channel === 'release' ? `v${version.version}` : version.channel === 'preview' ? `Preview v${version.version}` : 'Development'} · Change history`;
+        byId('release-notes').href = version.changelog;
+      }
       if (operation) {
         byId('lab-scenario').value = operation.scenario;
         if (operation.state) byId('lab-state').value = operation.state;
