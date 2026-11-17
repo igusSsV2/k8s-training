@@ -190,3 +190,8 @@ powershell -NoProfile -File training/troubleshooting/Test-Lifecycle.ps1
 It leaves the dedicated cluster running and empty. Run Setup or Deploy afterward
 to prepare the incidents again. Never commit kubeconfigs, real tokens, credentials,
 or local environment files. Practice Secrets contain fake values only.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Packaged releases include the license and matching
+package metadata from their source commit.

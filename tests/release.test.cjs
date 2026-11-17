@@ -85,6 +85,9 @@ test('package stages only runtime sources and generated, matching version metada
   stagePackage({root, directory: destination, metadata, changelog, published: false});
   const manifest = JSON.parse(fs.readFileSync(path.join(destination, 'package.json')));
   assert.equal(manifest.version, metadata.version);
+  const sourceManifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json')));
+  assert.equal(manifest.license, sourceManifest.license);
+  if (fs.existsSync(path.join(root, 'LICENSE'))) assert.equal(fs.readFileSync(path.join(destination, 'LICENSE'), 'utf8'), fs.readFileSync(path.join(root, 'LICENSE'), 'utf8'));
   assert.equal(manifest.devDependencies, undefined);
   assert.deepEqual(Object.keys(manifest.scripts), ['start']);
   assert.equal(JSON.parse(fs.readFileSync(path.join(destination, 'release.json'))).version, metadata.version);

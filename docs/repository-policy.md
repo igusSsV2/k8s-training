@@ -33,9 +33,10 @@ plan for release metadata and existing links. Future local commits are configure
 with the GitHub noreply identity; the owner's GitHub merge/email preferences are
 separate account settings.
 
-No project license has been selected yet. Public visibility does not itself
-select a license. License selection and any historical author-privacy decision
-remain owner choices tracked in issue #15.
+The owner selected the MIT license. See the root [LICENSE](../LICENSE); release
+packages include that file and matching package metadata. Earlier commits that
+predate license selection are not rewritten. Historical author-privacy changes
+remain an owner choice; no history rewrite is part of the publication/configuration work.
 
 ## Public release access
 
