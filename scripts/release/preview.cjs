@@ -4,12 +4,20 @@ const {bumpVersion, releaseLabel, validateChange, releaseNotes, changelogFor} = 
 const {git, readChanges} = require('./git.cjs');
 const {packageZip} = require('./package.cjs');
 const {smokeZip} = require('./smoke.cjs');
+const {GitHub} = require('./github.cjs');
 
 async function preview() {
   const root = path.resolve(__dirname, '../..');
   const policy = JSON.parse(fs.readFileSync(path.join(root, 'release-policy.json'), 'utf8'));
   const event = process.env.GITHUB_EVENT_PATH ? JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')) : null;
   const pr = event?.pull_request;
+  if (pr && process.env.GH_TOKEN) {
+    // Labels may have been applied after the opened/synchronize event was queued.
+    const github = new GitHub({repository: process.env.GITHUB_REPOSITORY, token: process.env.GH_TOKEN});
+    const current = await github.request(`pulls/${pr.number}`);
+    if (current.head.sha !== pr.head.sha) throw new Error('The PR has newer code. Wait for its replacement validation run.');
+    pr.labels = current.labels;
+  }
   const label = pr ? releaseLabel(pr.labels) : 'patch';
   const tags = git(root, ['tag', '--merged', 'HEAD', '--list', 'v*', '--sort=-version:refname']).split('\n');
   const latest = tags.find(tag => /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(tag));
