@@ -8,7 +8,8 @@ const {createHash} = require('node:crypto');
 const {parseVersion, releaseLabel, bumpVersion, validateChange, metadataFrom, releaseNotes, changelogFor, planReleases} = require('../scripts/release/core.cjs');
 const {stagePackage, packageZip} = require('../scripts/release/package.cjs');
 const {readChanges} = require('../scripts/release/git.cjs');
-const {publish, candidatesSince, ensureTag, uploadAssets} = require('../scripts/release/publish.cjs');
+const {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls} = require('../scripts/release/publish.cjs');
+const {GitHub, API_VERSION} = require('../scripts/release/github.cjs');
 const {smokeZip} = require('../scripts/release/smoke.cjs');
 
 const root = path.resolve(__dirname, '..');
@@ -16,6 +17,28 @@ const repository = 'igusSsV2/k8s-training';
 const change = {type: 'added', description: 'A useful feature.', issues: [4, 10], breaking: false};
 const metadata = {schema: 1, pr: 16, sha: 'a'.repeat(40), previousVersion: '0.0.0', version: '0.1.0', bump: 'minor', date: '2026-11-17'};
 function temporary() { return fs.mkdtempSync(path.join(os.tmpdir(), 'k8s release test ')); }
+
+test('release API requests pin the PR response contract required for merge identity', async () => {
+  let captured;
+  const github = new GitHub({repository, token: 'test-only', fetchRequest: async (url, options) => {
+    captured = {url, options}; return {ok: true, status: 200, json: async () => []};
+  }});
+  await github.list('commits/test/pulls');
+  assert.equal(API_VERSION, '2022-11-28');
+  assert.equal(captured.options.headers['X-GitHub-Api-Version'], '2022-11-28');
+  assert.ok(captured.url.startsWith(`https://api.github.com/repos/${repository}/`));
+});
+
+test('merged PR discovery retries missing associations but distinguishes an incompatible schema', async () => {
+  const merged = {number: 16, merged_at: '2026-11-17T20:00:00Z', base: {ref: 'main'}, merge_commit_sha: metadata.sha};
+  let reads = 0; const waits = [];
+  const result = await associatedPulls({list: async () => ++reads === 1 ? [] : [merged]}, metadata.sha, 'main', {sleep: async delay => waits.push(delay)});
+  assert.deepEqual(result, [merged]); assert.equal(reads, 2); assert.deepEqual(waits, [500]);
+  reads = 0;
+  const missing = await associatedPulls({list: async () => { reads++; return []; }}, metadata.sha, 'main', {sleep: async () => {}});
+  assert.deepEqual(missing, []); assert.equal(reads, 3);
+  await assert.rejects(associatedPulls({list: async () => [{...merged, merge_commit_sha: undefined}]}, metadata.sha, 'main'), /pinned REST API contract/);
+});
 
 test('exactly one supported release label is required, independent of other labels', () => {
   assert.equal(releaseLabel([{name: 'enhancement'}, {name: 'minor'}]), 'minor');
