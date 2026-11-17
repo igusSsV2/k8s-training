@@ -90,7 +90,9 @@ On the repository's Releases page, download:
 - The matching `.zip.sha256` file.
 - Optionally the standalone `CHANGELOG.md` asset (also inside the ZIP).
 
-Private-repository downloads require authorized GitHub access. The application
+The repository is now public, so published release assets do not require private
+repository credentials. Drafts and any future private visibility still require
+authorized access. See [repository policy](repository-policy.md). The application
 currently supports Windows x64; macOS/Linux support is tracked in issue #12.
 
 Verify and extract from a PowerShell terminal, replacing the example version:

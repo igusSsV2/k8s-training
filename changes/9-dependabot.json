@@ -1,0 +1,6 @@
+{
+  "type": "added",
+  "description": "Schedule weekly Dependabot PRs for npm dependencies and GitHub Actions. Group compatible updates, label maintenance changes for patch releases, and document review/changelog requirements without automatic merging.",
+  "issues": [9],
+  "breaking": false
+}
