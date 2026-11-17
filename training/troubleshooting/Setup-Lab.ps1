@@ -4,6 +4,7 @@ param(
 )
 . "$PSScriptRoot/Prerequisites.ps1"
 try {
+    Write-LabStep 'Checking Windows and WSL prerequisites'
     if ($env:OS -ne 'Windows_NT' -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw 'This setup supports Windows x64.' }
     $wsl = Get-Command wsl.exe -ErrorAction SilentlyContinue
     if (-not $wsl) { throw 'WSL is unavailable. Install WSL 2 using the course SETUP.md, restart Windows, and rerun this script.' }
@@ -20,6 +21,7 @@ try {
         exit 2
     }
     if (-not (Find-DockerDesktop)) {
+        Write-LabStep 'Installing Docker Desktop'
         $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
         if (-not $winget) { throw 'winget is unavailable. Install Docker Desktop using the official link in SETUP.md, then rerun setup.' }
         & $winget.Source install --exact --id Docker.DockerDesktop --source winget --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
@@ -28,6 +30,7 @@ try {
         if ($installExit -ne 0) { throw "Docker Desktop installation failed (exit $installExit). Complete installation manually, then rerun setup." }
     }
     Start-LabDocker
+    Write-LabStep 'Installing or verifying local Kubernetes tools'
     & "$PSScriptRoot/Install-Tools.ps1"
     if ($LASTEXITCODE -ne 0) { throw 'Portable tool installation failed.' }
     & "$PSScriptRoot/Check-Prerequisites.ps1" -CheckNetwork
@@ -39,4 +42,4 @@ try {
     Write-Host 'Setup complete.'
     exit 0
 }
-catch { Write-Error $_.Exception.Message -ErrorAction Continue; exit 1 }
+catch { Write-LabError $_.Exception.Message; exit 1 }

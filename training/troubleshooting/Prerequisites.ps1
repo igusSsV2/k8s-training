@@ -23,7 +23,9 @@ function Find-DockerDesktop {
 
 function Get-PrerequisiteReport {
     $checks = @()
+    Write-LabStep 'Checking Windows architecture'
     $checks += [pscustomobject]@{Name='Windows x64'; Ready=($env:OS -eq 'Windows_NT' -and $env:PROCESSOR_ARCHITECTURE -eq 'AMD64'); Detail='These portable tools require Windows x64.'}
+    Write-LabStep 'Checking WSL'
     $wsl = Get-Command wsl.exe -ErrorAction SilentlyContinue
     $wslReady = $false
     if ($wsl) {
@@ -31,8 +33,10 @@ function Get-PrerequisiteReport {
         $wslReady = $probe.ExitCode -eq 0
     }
     $checks += [pscustomobject]@{Name='WSL'; Ready=$wslReady; Detail='If missing, run Setup-Lab.ps1 from an administrator terminal; reboot if requested.'}
+    Write-LabStep 'Checking Docker CLI'
     $docker = Get-Command docker.exe -ErrorAction SilentlyContinue
     $checks += [pscustomobject]@{Name='Docker CLI'; Ready=($null -ne $docker); Detail='Setup-Lab.ps1 can install Docker Desktop and refresh this process PATH.'}
+    Write-LabStep 'Checking Docker Linux engine'
     $linux = $false
     if ($docker) {
         $probe = Invoke-HostProbe $docker.Source @('info', '--format', '{{.OSType}}')
@@ -40,6 +44,7 @@ function Get-PrerequisiteReport {
     }
     $checks += [pscustomobject]@{Name='Docker Linux engine'; Ready=$linux; Detail='Start Docker Desktop, finish onboarding, and select Linux containers.'}
     foreach ($name in @('kind', 'kubectl')) {
+        Write-LabStep "Checking $name"
         $ready = $false
         try {
             $tool = Find-LabTool $name
@@ -68,6 +73,7 @@ function Update-DockerPath {
 }
 
 function Start-LabDocker {
+    Write-LabStep 'Starting or checking Docker Desktop'
     Update-DockerPath
     $desktop = Find-DockerDesktop
     if (-not $desktop) { throw 'Docker Desktop is not installed in a supported location.' }

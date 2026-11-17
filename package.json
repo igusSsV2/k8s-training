@@ -1,0 +1,19 @@
+{
+  "name": "kube-together",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Kubernetes training dashboard and lab control service",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server/index.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check server/actions.cjs && node --check server/operations.cjs && node --check server/index.cjs && node --check dist/control.js && node --check dist/app.js && node --check dist/course.js",
+    "sync-course": "node training/scripts/Sync-Course.cjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

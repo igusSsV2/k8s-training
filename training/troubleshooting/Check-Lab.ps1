@@ -6,6 +6,7 @@ param(
 try {
     Assert-LabCluster
     foreach ($number in (Get-Scenarios $Scenario)) {
+        Write-LabStep "Checking scenario $number ($State state)"
         $ns = "trouble-$number"
         Assert-OwnedNamespace $ns
         if ($State -eq 'Broken') {
@@ -40,4 +41,4 @@ try {
     Write-Host "$State checks passed. Explain your evidence to complete the exercise."
     exit 0
 }
-catch { Write-Error $_.Exception.Message -ErrorAction Continue; exit 1 }
+catch { Write-LabError $_.Exception.Message; exit 1 }

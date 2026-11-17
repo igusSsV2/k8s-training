@@ -9,6 +9,7 @@ try {
         @{Name='kubectl'; Url='https://dl.k8s.io/release/v1.35.0/bin/windows/amd64/kubectl.exe'; ChecksumSuffix='.sha256'}
     )
     foreach ($download in $downloads) {
+        Write-LabStep "Verifying $($download.Name) and its published checksum"
         $target = Join-Path $ToolsRoot ($download.Name + '.exe')
         $temporary = "$target.$([guid]::NewGuid().ToString('N')).download"
         $checksumFile = "$temporary.sha256"
@@ -24,6 +25,7 @@ try {
                     continue
                 }
             }
+            Write-LabStep "Downloading $($download.Name)"
             & curl.exe --fail --silent --show-error --location --retry 2 --connect-timeout 15 --max-time 180 --output $temporary $download.Url
             if ($LASTEXITCODE -ne 0) { throw "Cannot download $($download.Name)" }
             $actual = (Get-FileHash -LiteralPath $temporary -Algorithm SHA256).Hash
@@ -39,4 +41,4 @@ try {
     Write-Host 'Tools ready. Docker Desktop must be installed, started, and using Linux containers.'
     exit 0
 }
-catch { Write-Error $_.Exception.Message -ErrorAction Continue; exit 1 }
+catch { Write-LabError $_.Exception.Message; exit 1 }

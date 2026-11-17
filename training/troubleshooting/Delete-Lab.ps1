@@ -8,6 +8,7 @@ try {
     $clusters = @(Invoke-LabTool kind @('get', 'clusters'))
     if ($clusters -notcontains $ClusterName) { Write-Host 'Lab cluster is already absent.'; exit 0 }
     if ($DeleteCluster) {
+        Write-LabStep 'Deleting the entire k8s-troubleshooting cluster'
         $null = Invoke-LabTool kind @('delete', 'cluster', '--name', $ClusterName, '--kubeconfig', $Kubeconfig)
         Remove-Item -LiteralPath $Kubeconfig -ErrorAction SilentlyContinue
     }
@@ -16,10 +17,11 @@ try {
         # Validate every target before beginning deletion.
         foreach ($number in (Get-Scenarios $Scenario)) { Assert-OwnedNamespace "trouble-$number" -AllowMissing }
         foreach ($number in (Get-Scenarios $Scenario)) {
+            Write-LabStep "Deleting scenario $number namespace"
             $null = Invoke-LabKube @('delete', 'namespace', "trouble-$number", '--ignore-not-found', '--timeout=120s')
         }
     }
     Write-Host 'Requested lab resources removed.'
     exit 0
 }
-catch { Write-Error $_.Exception.Message -ErrorAction Continue; exit 1 }
+catch { Write-LabError $_.Exception.Message; exit 1 }

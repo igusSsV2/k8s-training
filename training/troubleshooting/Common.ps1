@@ -1,4 +1,9 @@
 $ErrorActionPreference = 'Stop'
+if ($env:KUBE_LAB_EVENTS -eq '1') {
+    $OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+    [Console]::OutputEncoding = $OutputEncoding
+    $ProgressPreference = 'SilentlyContinue'
+}
 $LabRoot = $PSScriptRoot
 $RepositoryRoot = (Resolve-Path (Join-Path $LabRoot '../..')).Path
 $ToolsRoot = Join-Path $RepositoryRoot '.tools/k8s-troubleshooting'
@@ -7,6 +12,22 @@ $ClusterName = 'k8s-troubleshooting'
 $Context = 'kind-k8s-troubleshooting'
 $WebImage = 'nginx:1.28.0-alpine'
 $NodeImage = 'kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f'
+
+function Write-LabStep {
+    param([string]$Message)
+    if ($env:KUBE_LAB_EVENTS -eq '1') {
+        Write-Host ('KUBE_EVENT ' + (@{type='step'; message=$Message} | ConvertTo-Json -Compress))
+    }
+    else { Write-Host "STEP: $Message" }
+}
+
+function Write-LabError {
+    param([string]$Message)
+    if ($env:KUBE_LAB_EVENTS -eq '1' -and $Message -match 'administrator|onboarding|Switch to Linux|WSL is unavailable|winget is unavailable|complete installation manually|install Docker Desktop using') {
+        Write-Host ('KUBE_EVENT ' + (@{type='guidance'; message=$Message} | ConvertTo-Json -Compress))
+    }
+    Write-Error -Message $Message -ErrorAction Continue
+}
 
 function Find-LabTool {
     param([string]$Name)
@@ -43,6 +64,7 @@ function Get-Scenarios {
 }
 
 function Assert-LabCluster {
+    Write-LabStep 'Checking the dedicated cluster and waiting for its node'
     $clusters = @(Invoke-LabTool kind @('get', 'clusters'))
     if ($clusters -notcontains $ClusterName) { throw 'Lab cluster is absent. Run Deploy-Lab.ps1.' }
     if (-not (Test-Path -LiteralPath $Kubeconfig)) {
