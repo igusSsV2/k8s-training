@@ -4,6 +4,9 @@ Hands-on Kubernetes practice for beginners on Windows: eight guided lessons,
 a browser dashboard, and three independently deployable troubleshooting incidents.
 Run commands in PowerShell from this repository's root directory.
 
+Contributions follow an issue -> task branch -> pull request workflow, with PRs
+targeting `main`. See [repository instructions](AGENTS.md) for details.
+
 ## Start the troubleshooting labs
 
 ```powershell
