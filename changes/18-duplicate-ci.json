@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Separate fast release-metadata checks from full code validation so label edits do not restart Windows tests or packaging. Refresh labels before generating a package preview.",
+  "issues": [18],
+  "breaking": false
+}
