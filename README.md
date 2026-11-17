@@ -6,6 +6,11 @@ Run commands in PowerShell from this repository's root directory.
 
 Contributions follow an issue -> task branch -> pull request workflow, with PRs
 targeting `main`. See [repository instructions](AGENTS.md) for details.
+Every implementation PR must update the affected documentation, commands,
+examples and screenshots, or explain why documentation is unchanged. Include a
+user-facing change summary; the versioned changelog/release workflow is tracked
+in #4 and #10. Each release must package documentation matching its actual
+version, prerequisites, launch/update flow, limitations and migration notes.
 
 ## Launch the management webpage
 
