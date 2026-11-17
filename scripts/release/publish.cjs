@@ -7,13 +7,27 @@ const {GitHub} = require('./github.cjs');
 const {packageZip} = require('./package.cjs');
 const {smokeZip} = require('./smoke.cjs');
 
+async function associatedPulls(github, sha, branch, {attempts = 3, sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))} = {}) {
+  let associated = [];
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    associated = await github.list(`commits/${sha}/pulls`);
+    const merged = associated.filter(pr => pr.merged_at && pr.base.ref === branch);
+    if (merged.some(pr => !/^[a-f0-9]{40}$/.test(pr.merge_commit_sha || ''))) {
+      throw new Error('GitHub merged PR response lacks merge_commit_sha. Check the pinned REST API contract; this is not evidence of a direct push.');
+    }
+    if (merged.length) return associated;
+    if (attempt + 1 < attempts) await sleep(500 * (attempt + 1));
+  }
+  return associated;
+}
+
 async function candidatesSince(root, policy, github) {
   const commits = git(root, ['rev-list', '--first-parent', '--reverse', `${policy.baselineCommit}..HEAD`]).split('\n').filter(Boolean);
   git(root, ['merge-base', '--is-ancestor', policy.baselineCommit, 'HEAD']);
   const candidates = [];
   let previous = policy.baselineCommit;
   for (const sha of commits) {
-    const associated = await github.list(`commits/${sha}/pulls`);
+    const associated = await associatedPulls(github, sha, policy.branch);
     const merged = associated.filter(pr => pr.merged_at && pr.base.ref === policy.branch);
     const pr = merged.find(item => item.merge_commit_sha === sha);
     if (!pr) {
@@ -105,4 +119,4 @@ async function publish({root = path.resolve(__dirname, '../..'), github, prepare
 }
 
 if (require.main === module) publish().catch(error => { console.error(error.message); process.exitCode = 1; });
-module.exports = {publish, candidatesSince, ensureTag, uploadAssets};
+module.exports = {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls};
