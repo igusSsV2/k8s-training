@@ -1,0 +1,6 @@
+{
+  "type": "changed",
+  "description": "Record owner-enabled public repository visibility, verified pull-request enforcement for main (including administrators), required status checks, and the publication review. Document remaining license and historical author-privacy choices.",
+  "issues": [6, 15],
+  "breaking": false
+}

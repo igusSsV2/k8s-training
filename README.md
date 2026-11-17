@@ -131,6 +131,12 @@ controls execute the standalone troubleshooting scripts through the local servic
 
 ## Repository and validation
 
+Dependency and GitHub Actions updates use [Dependabot](docs/dependencies.md), with
+weekly reviewed PRs and no automatic merging. Maintainers add an issue/changelog
+entry and run the same applicable validation before merging an update.
+The [repository policy](docs/repository-policy.md) records public visibility,
+verified `main` protections, required checks, and publication-review findings.
+
 - `dist/`: static dashboard and bundled lessons.
 - `training/labs/`: guided exercises 01-08.
 - `training/manifests/`: reference resources for the guided course.
