@@ -13,16 +13,16 @@ and fixing, and 10 minutes explaining the result to each other.
 Alternate driver (types commands) and navigator (predicts results and reviews).
 Swap halfway through. Both people must explain the lab without reading commands.
 
-| Session | Topic | Practical outcome |
-| --- | --- | --- |
-| 01 | Containers, cluster, desired state | Explain nodes, Pods and controllers |
-| 02 | Deployments and recovery | Scale and observe a replacement Pod |
-| 03 | Services and DNS | Reach the application through a stable name |
-| 04 | Configuration and Secrets | Change content without rebuilding an image |
-| 05 | Probes, resources and rollout | Diagnose a failed rollout and recover |
-| 06 | Persistent storage and Jobs | Keep data after replacing a writer Pod |
-| 07 | ServiceAccounts and RBAC | Prove allowed and forbidden operations |
-| 08 | Incident capstone | Repair three faults and explain the evidence |
+| Session | Topic                              | Practical outcome                            |
+| ------- | ---------------------------------- | -------------------------------------------- |
+| 01      | Containers, cluster, desired state | Explain nodes, Pods and controllers          |
+| 02      | Deployments and recovery           | Scale and observe a replacement Pod          |
+| 03      | Services and DNS                   | Reach the application through a stable name  |
+| 04      | Configuration and Secrets          | Change content without rebuilding an image   |
+| 05      | Probes, resources and rollout      | Diagnose a failed rollout and recover        |
+| 06      | Persistent storage and Jobs        | Keep data after replacing a writer Pod       |
+| 07      | ServiceAccounts and RBAC           | Prove allowed and forbidden operations       |
+| 08      | Incident capstone                  | Repair three faults and explain the evidence |
 
 Start with [SETUP.md](SETUP.md), then [labs/01.md](labs/01.md).
 Labs 01-05 and 08 share one application. Labs 06-07 add independent resources.

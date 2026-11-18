@@ -3,10 +3,10 @@
 Dependabot is configured in `.github/dependabot.yml` for the repository's actual
 dependency ecosystems:
 
-| Ecosystem | Files | Schedule (Buenos Aires) |
-| --- | --- | --- |
-| npm | Root package.json/package-lock.json | Monday 09:00 |
-| GitHub Actions | .github/workflows/ | Monday 09:30 |
+| Ecosystem      | Files                               | Schedule (Buenos Aires) |
+| -------------- | ----------------------------------- | ----------------------- |
+| npm            | Root package.json/package-lock.json | Monday 09:00            |
+| GitHub Actions | .github/workflows/                  | Monday 09:30            |
 
 Compatible minor/patch dependency upgrades are grouped per ecosystem; major
 upgrades remain separate for review. Each ecosystem permits at most five open
