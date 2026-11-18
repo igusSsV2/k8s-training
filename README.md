@@ -134,6 +134,8 @@ controls execute the standalone troubleshooting scripts through the local servic
 Dependency and GitHub Actions updates use [Dependabot](docs/dependencies.md), with
 weekly reviewed PRs and no automatic merging. Maintainers add an issue/changelog
 entry and run the same applicable validation before merging an update.
+The [security scanning guide](docs/security.md) describes CodeQL coverage, alert
+triage, and the PowerShell analysis limitation.
 The [repository policy](docs/repository-policy.md) records public visibility,
 verified `main` protections, required checks, and publication-review findings.
 
@@ -145,7 +147,7 @@ verified `main` protections, required checks, and publication-review findings.
 - `server/`: local HTTP/SSE service and predefined PowerShell action runner.
 - `scripts/release/`: version planning, package validation and release publishing.
 - `changes/`: reviewed source entries for versioned change history.
-- `.github/workflows/`: PR validation and post-merge release automation.
+- `.github/workflows/`: PR validation, CodeQL scanning, and release automation.
 
 Runtime uses only built-in Node modules. Development/browser checks use the
 locked Playwright dependency. Install test dependencies and Chromium once:
