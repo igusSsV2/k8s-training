@@ -48,6 +48,13 @@ async function ensureTag(github, metadata) {
   } else await github.request('git/refs', {method: 'POST', body: {ref: `refs/tags/${tag}`, sha: metadata.sha}});
 }
 
+function checkPublicationAuthorization(root, plans, tokenSource) {
+  const historicalWorkflowChange = plans.find(plan => !plan.published && git(root, ['diff', '--name-only', plan.metadata.sha, 'HEAD', '--', '.github/workflows/']));
+  if (historicalWorkflowChange && tokenSource !== 'repository-secret') {
+    throw new Error(`Publishing v${historicalWorkflowChange.metadata.version} targets historical workflow files. Configure RELEASE_PUBLISH_TOKEN with repository-only Contents: write and Workflows: write, then rerun. GITHUB_TOKEN cannot receive Workflows: write; see docs/releases.md.`);
+  }
+}
+
 async function uploadAssets(github, release, files) {
   if (!release.draft || !metadataFrom(release.body)) throw new Error('Only an identified draft may have its assets replaced.');
   const previous = await github.list(`releases/${release.id}/assets`);
@@ -60,6 +67,7 @@ async function uploadAssets(github, release, files) {
 }
 
 function validateSource(source) {
+  console.log('VALIDATION ONLY: publication messages inside the following tests are simulated, not GitHub releases.');
   const env = {...process.env}; delete env.GH_TOKEN; delete env.GITHUB_TOKEN;
   const options = {cwd: source, stdio: 'inherit', env};
   const npm = path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
@@ -84,7 +92,7 @@ async function preparePackage({root, metadata, notes, history}) {
   return result;
 }
 
-async function publish({root = path.resolve(__dirname, '../..'), github, prepare = preparePackage} = {}) {
+async function publish({root = path.resolve(__dirname, '../..'), github, prepare = preparePackage, log = console.log} = {}) {
   const policy = JSON.parse(fs.readFileSync(path.join(root, 'release-policy.json'), 'utf8'));
   if (!github) {
     if (process.env.GITHUB_REPOSITORY?.toLowerCase() !== policy.repository.toLowerCase()) throw new Error('Release workflow repository does not match release-policy.json.');
@@ -93,6 +101,7 @@ async function publish({root = path.resolve(__dirname, '../..'), github, prepare
   const existing = await github.list('releases');
   if (existing.some(release => !release.draft && !release.prerelease && /^v\d+\.\d+\.\d+$/.test(release.tag_name) && !metadataFrom(release.body))) throw new Error('A stable release exists without pipeline identity metadata. Review/import that release before publishing.');
   const plans = planReleases(await candidatesSince(root, policy, github), existing, policy.initialVersion);
+  checkPublicationAuthorization(root, plans, process.env.RELEASE_TOKEN_SOURCE);
   const history = [];
   for (const plan of plans) {
     const {metadata} = plan;
@@ -102,7 +111,7 @@ async function publish({root = path.resolve(__dirname, '../..'), github, prepare
       await ensureTag(github, metadata);
       const assets = await github.list(`releases/${plan.release.id}/assets`);
       if (![filename, `${filename}.sha256`, 'CHANGELOG.md'].every(name => assets.some(asset => asset.name === name && asset.state === 'uploaded'))) throw new Error(`Published v${metadata.version} has incomplete assets; refusing to overwrite it.`);
-      console.log(`Already published: v${metadata.version} (PR #${metadata.pr}).`);
+      log(`Already published: v${metadata.version} (PR #${metadata.pr}).`);
       history.unshift(notes); continue;
     }
     const result = await prepare({root, metadata, notes, history});
@@ -112,11 +121,11 @@ async function publish({root = path.resolve(__dirname, '../..'), github, prepare
     await uploadAssets(github, release, [result.archive, result.checksum, result.changelog]);
     await github.request(`releases/${release.id}`, {method: 'PATCH', body: {draft: false, make_latest: 'true'}});
     history.unshift(notes);
-    console.log(`Published v${metadata.version} from PR #${metadata.pr}.`);
+    log(`Published v${metadata.version} from PR #${metadata.pr}: https://github.com/${policy.repository}/releases/tag/v${metadata.version}`);
     if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Published [v${metadata.version}](https://github.com/${policy.repository}/releases/tag/v${metadata.version}) from PR #${metadata.pr}.\n\n`);
   }
-  if (!plans.length) console.log('No merged PRs after the release baseline.');
+  if (!plans.length) log('No merged PRs after the release baseline.');
 }
 
 if (require.main === module) publish().catch(error => { console.error(error.message); process.exitCode = 1; });
-module.exports = {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls};
+module.exports = {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization};

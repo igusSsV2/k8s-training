@@ -131,6 +131,42 @@ shows when the release was actually published. This keeps retries consistent.
 
 ## Failure recovery
 
+### Historical workflow commits and the publishing credential
+
+GitHub requires **Workflows: write** when a release/tag target has workflow files
+that differ from the current default branch. The oldest unreleased commit in
+this repository has that difference. The built-in `GITHUB_TOKEN` cannot receive
+this permission, even when its job has `contents: write`.
+
+The owner must configure an expiring fine-grained token as follows:
+
+1. In GitHub **Settings → Developer settings → Personal access tokens →
+   Fine-grained tokens**, create a token with a short expiry, resource owner
+   `igusSsV2`, and **Only select repositories → k8s-training**.
+2. Grant repository **Contents: Read and write** and **Workflows: Read and write**;
+   Metadata read access is implicit. Also grant **Pull requests: Read-only** for
+   merge/label discovery. No account-wide or administration permission is needed.
+3. In this repository, **Settings → Secrets and variables → Actions**, add the
+   repository secret **RELEASE_PUBLISH_TOKEN**. Enter the token there, not in a
+   file, PR, issue, log or chat message.
+4. Merge the authorization fix and run **Publish versioned release** on `main`.
+   Verify the actual release URL and its ZIP/checksum/changelog assets.
+5. Rotate the secret before expiry or remove it if this publication mode is no
+   longer needed. An approved GitHub App with the same repository permissions
+   can supply an installation token instead; do not copy a broad CLI login token.
+
+The publisher uses this secret only in the trusted `main` publishing job. PR
+validation continues using the restricted job token. Source tests and extracted
+application startup do not inherit the publishing token. Without the secret,
+ordinary current-workflow releases can still use `GITHUB_TOKEN`, but historical
+workflow differences fail a preflight check before expensive validation. Branch
+protection stays enabled, and changing the tag target to a different commit is
+not used as an authorization workaround.
+
+Reference: [GitHub release workflow-file permission restriction](https://docs.github.com/en/rest/releases/releases#create-a-release).
+
+### Other failures
+
 1. Open the failed Actions run and inspect the failing step. Nothing is published
    if validation or package startup fails.
 2. If a merged PR lacks a bump label, add exactly one appropriate label to that PR,
@@ -147,10 +183,10 @@ shows when the release was actually published. This keeps retries consistent.
 6. If the concurrency pending-trigger limit cancels a trigger, dispatch the
    publisher manually; it catches up from the complete merge history.
 
-GitHub supplies an ephemeral job token with `contents: write` and PR read access
-only to the publisher. Checkout credentials are not persisted. No long-lived PAT
-or secret needs to be committed. Repo Actions must be enabled and permitted to
-write release contents; organization policy can still restrict that grant.
+GitHub supplies an ephemeral job token with `contents: write` and PR read access;
+the publisher uses the scoped repository secret above when configured. Checkout
+credentials are not persisted, and no credential belongs in Git. Repo Actions
+must be enabled; organization policy can still restrict available grants.
 
 The publisher pins REST API version `2022-11-28` because exact merge identity
 depends on `merge_commit_sha`. The `2026-03-10` contract removes that field from

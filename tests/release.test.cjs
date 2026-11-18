@@ -8,7 +8,7 @@ const {createHash} = require('node:crypto');
 const {parseVersion, releaseLabel, bumpVersion, validateChange, metadataFrom, releaseNotes, changelogFor, planReleases} = require('../scripts/release/core.cjs');
 const {stagePackage, packageZip} = require('../scripts/release/package.cjs');
 const {readChanges} = require('../scripts/release/git.cjs');
-const {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls} = require('../scripts/release/publish.cjs');
+const {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization} = require('../scripts/release/publish.cjs');
 const {GitHub, API_VERSION} = require('../scripts/release/github.cjs');
 const {smokeZip} = require('../scripts/release/smoke.cjs');
 
@@ -17,6 +17,32 @@ const repository = 'igusSsV2/k8s-training';
 const change = {type: 'added', description: 'A useful feature.', issues: [4, 10], breaking: false};
 const metadata = {schema: 1, pr: 16, sha: 'a'.repeat(40), previousVersion: '0.0.0', version: '0.1.0', bump: 'minor', date: '2026-11-17'};
 function temporary() { return fs.mkdtempSync(path.join(os.tmpdir(), 'k8s release test ')); }
+
+test('GitHub authorization diagnostics expose the cause without exposing the token', async () => {
+  const token = 'test-only-sensitive-token';
+  const github = new GitHub({repository, token, fetchRequest: async () => ({ok: false, status: 403, json: async () => ({message: `Resource not accessible by integration ${token}`})})});
+  await assert.rejects(github.request('git/refs', {method: 'POST', body: {ref: 'refs/tags/v0.1.0', sha: metadata.sha}}), error => {
+    assert.match(error.message, /403.*git\/refs.*Resource not accessible/);
+    assert.ok(!error.message.includes(token));
+    return true;
+  });
+});
+
+test('historical workflow publication requires an explicit scoped publishing credential before building', () => {
+  const temp = temporary();
+  const git = (...args) => execFileSync('git', ['-C', temp, ...args], {encoding: 'utf8'}).trim();
+  git('init', '-b', 'main'); git('config', 'user.name', 'Test'); git('config', 'user.email', 'test@example.invalid');
+  fs.mkdirSync(path.join(temp, '.github/workflows'), {recursive: true});
+  fs.writeFileSync(path.join(temp, '.github/workflows/build.yml'), 'name: initial');
+  git('add', '.'); git('commit', '-m', 'Initial'); const previous = git('rev-parse', 'HEAD');
+  fs.writeFileSync(path.join(temp, '.github/workflows/build.yml'), 'name: changed');
+  git('add', '.'); git('commit', '-m', 'Changed workflows');
+  const plans = [{published: false, metadata: {...metadata, sha: previous}}];
+  assert.throws(() => checkPublicationAuthorization(temp, plans, 'github-token'), /RELEASE_PUBLISH_TOKEN/);
+  assert.doesNotThrow(() => checkPublicationAuthorization(temp, plans, 'repository-secret'));
+  assert.doesNotThrow(() => checkPublicationAuthorization(temp, [{...plans[0], published: true}], 'github-token'));
+  assert.doesNotThrow(() => checkPublicationAuthorization(temp, [{published: false, metadata: {...metadata, sha: git('rev-parse', 'HEAD')}}], 'github-token'));
+});
 
 test('release API requests pin the PR response contract required for merge identity', async () => {
   let captured;
@@ -194,11 +220,11 @@ test('publication gates writes on validation and resumes partial uploads without
   await assert.rejects(publish({root: temp, github, prepare}), /Interrupted upload/);
   assert.equal(releases.length, 1); assert.equal(releases[0].draft, true);
   failUpload = false; pr.labels = [{name: 'major'}]; // A resumed draft keeps its frozen bump.
-  await publish({root: temp, github, prepare});
+  await publish({root: temp, github, prepare, log: message => console.log(`SIMULATED: ${message}`)});
   assert.equal(releases.length, 1); assert.equal(releases[0].draft, false);
   assert.equal(assets.length, 3);
   const afterPublication = writes.length;
-  await publish({root: temp, github, prepare: async () => { throw new Error('Published release must be skipped'); }});
+  await publish({root: temp, github, prepare: async () => { throw new Error('Published release must be skipped'); }, log: () => {}});
   assert.equal(writes.length, afterPublication);
   assert.deepEqual(versions, ['0.1.0', '0.1.0']);
 });

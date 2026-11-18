@@ -34,4 +34,5 @@ jobs:
       - name: Validate unreleased merges and publish complete assets
         run: node scripts/release/publish.cjs
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PUBLISH_TOKEN || github.token }}
+          RELEASE_TOKEN_SOURCE: ${{ secrets.RELEASE_PUBLISH_TOKEN != '' && 'repository-secret' || 'github-token' }}
