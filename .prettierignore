@@ -1,0 +1,5 @@
+node_modules/
+.tools/
+dist/course.js
+package-lock.json
+training/troubleshooting/baseline.yaml

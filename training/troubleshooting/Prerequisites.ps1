@@ -65,14 +65,18 @@ function Assert-PrerequisiteReport {
 }
 
 function Update-DockerPath {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
     $desktop = Find-DockerDesktop
     if ($desktop) {
         $bin = Join-Path (Split-Path $desktop -Parent) 'resources/bin'
-        if (Test-Path -LiteralPath (Join-Path $bin 'docker.exe')) { $env:PATH = "$bin;$env:PATH" }
+        if ((Test-Path -LiteralPath (Join-Path $bin 'docker.exe')) -and $PSCmdlet.ShouldProcess('Process PATH', 'Prepend Docker Desktop tools')) { $env:PATH = "$bin;$env:PATH" }
     }
 }
 
 function Start-LabDocker {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
     Write-LabStep 'Starting or checking Docker Desktop'
     Update-DockerPath
     $desktop = Find-DockerDesktop
@@ -85,6 +89,7 @@ function Start-LabDocker {
         throw 'Docker is using Windows containers. Select Switch to Linux containers in Docker Desktop, then rerun setup.'
     }
     Write-Host 'Starting Docker Desktop; waiting up to three minutes for its Linux engine.'
+    if (-not $PSCmdlet.ShouldProcess($desktop, 'Start Docker Desktop')) { return }
     Start-Process -FilePath $desktop -WindowStyle Hidden
     $deadline = (Get-Date).AddSeconds(180)
     do {

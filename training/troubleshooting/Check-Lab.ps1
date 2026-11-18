@@ -5,7 +5,7 @@ param(
 . "$PSScriptRoot/Common.ps1"
 try {
     Assert-LabCluster
-    foreach ($number in (Get-Scenarios $Scenario)) {
+    foreach ($number in (Get-ScenarioNumber $Scenario)) {
         Write-LabStep "Checking scenario $number ($State state)"
         $ns = "trouble-$number"
         Assert-OwnedNamespace $ns

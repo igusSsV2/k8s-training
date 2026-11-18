@@ -7,7 +7,7 @@ try {
     foreach ($number in 1..3) {
         # baseline.yaml is also the instructor recovery reference.
         $null = Invoke-LabKube @('-n', "trouble-$number", 'apply', '-f', (Join-Path $LabRoot 'baseline.yaml'))
-        $null = Apply-LabJson @{
+        $null = Invoke-LabApplyJson @{
             apiVersion='v1'; kind='ConfigMap'; metadata=@{name='web-content'}
             data=@{'index.html'="<h1>Troubleshooting scenario $number</h1>"}
         } "trouble-$number"

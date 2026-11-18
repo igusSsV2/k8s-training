@@ -12,12 +12,25 @@
     "check": "node scripts/check.cjs",
     "sync-course": "node training/scripts/Sync-Course.cjs",
     "test:browser": "playwright test",
+    "lint:js": "eslint dist/app.js dist/control.js server scripts tests playwright.config.cjs",
+    "lint:format": "prettier --check README.md \"docs/**/*.md\" \"training/**/*.md\" \"changes/*.json\" \".github/**/*.{yaml,yml}\" package.json *.json",
+    "lint:spelling": "cspell lint . --no-progress",
+    "lint:yaml": "powershell -NoProfile -NonInteractive -File scripts/quality/Invoke-Yamllint.ps1",
+    "lint:actions": "powershell -NoProfile -NonInteractive -File scripts/quality/Invoke-Actionlint.ps1",
+    "lint:powershell": "powershell -NoProfile -NonInteractive -File scripts/quality/Test-PowerShell.ps1",
+    "lint": "npm run lint:js && npm run lint:format && npm run lint:spelling && npm run lint:yaml && npm run lint:actions && npm run lint:powershell",
     "package:preview": "node scripts/release/preview.cjs",
     "release:validate-pr": "node scripts/release/validate-pr.cjs",
     "release:publish": "node scripts/release/publish.cjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.1"
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
+    "cspell": "10.5.2",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "yaml": "^2.9.1"
   },
   "license": "MIT"
 }

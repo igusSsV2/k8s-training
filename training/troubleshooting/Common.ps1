@@ -10,8 +10,6 @@ $ToolsRoot = Join-Path $RepositoryRoot '.tools/k8s-troubleshooting'
 $Kubeconfig = Join-Path $ToolsRoot 'kubeconfig'
 $ClusterName = 'k8s-troubleshooting'
 $Context = 'kind-k8s-troubleshooting'
-$WebImage = 'nginx:1.28.0-alpine'
-$NodeImage = 'kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f'
 
 function Write-LabStep {
     param([string]$Message)
@@ -57,7 +55,7 @@ function Assert-Lab {
     Write-Host "PASS: $Message"
 }
 
-function Get-Scenarios {
+function Get-ScenarioNumber {
     param([string]$Scenario)
     if ($Scenario -eq 'All') { return @(1, 2, 3) }
     return @([int]$Scenario)
@@ -84,7 +82,7 @@ function Assert-OwnedNamespace {
     Assert-Lab ($ns.metadata.labels.'training.kube-together/owner' -eq 'troubleshooting') "Namespace $Namespace belongs to these labs"
 }
 
-function Apply-LabJson {
+function Invoke-LabApplyJson {
     param($Resource, [string]$Namespace)
     # A file avoids Windows PowerShell native-pipe encoding issues.
     $file = Join-Path $ToolsRoot ('resource-' + [guid]::NewGuid().ToString('N') + '.json')
@@ -96,6 +94,7 @@ function Apply-LabJson {
 }
 
 function Set-LabFault {
+    [CmdletBinding(SupportsShouldProcess)]
     param([int]$Scenario)
     $ns = "trouble-$Scenario"
     # Full JSON patches are passed by file for Windows native argument compatibility.
@@ -108,6 +107,7 @@ function Set-LabFault {
         ) }
     }
     $resource = if ($Scenario -eq 2) { 'service/web' } else { 'deployment/web' }
+    if (-not $PSCmdlet.ShouldProcess("$resource in $ns", "Apply training fault for scenario $Scenario")) { return }
     $file = Join-Path $ToolsRoot ('patch-' + [guid]::NewGuid().ToString('N') + '.json')
     try {
         ConvertTo-Json -InputObject @($patch) -Depth 10 | Set-Content -LiteralPath $file -Encoding UTF8
@@ -159,7 +159,7 @@ function Test-LabHttp {
     if ($ExpectFailure) { $command = "if $request; then exit 1; else echo expected-unavailable; fi" }
     $job = 'check-' + [guid]::NewGuid().ToString('N').Substring(0, 8)
     try {
-        $null = Apply-LabJson @{
+        $null = Invoke-LabApplyJson @{
             apiVersion='batch/v1'; kind='Job'; metadata=@{name=$job}
             spec=@{backoffLimit=0; activeDeadlineSeconds=90; template=@{spec=@{
                 restartPolicy='Never'; containers=@(@{name='http'; image='busybox:1.37.0'; command=@('sh','-c',$command)})

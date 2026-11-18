@@ -44,6 +44,28 @@ test('guided lessons and learner journals remain usable', async ({page}) => {
   await expect(page.locator('#notes')).toHaveValue('My investigation evidence');
 });
 
+test('progress backup exports, restores, and rejects invalid files', async ({page}) => {
+  await page.goto('/');
+  await page.locator('#grid .card').first().click();
+  await page.locator('#notes').fill('Backup evidence');
+  await page.locator('#close').click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#export').click();
+  const backup = await downloadPromise;
+  const backupPath = await backup.path();
+
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  page.on('dialog', dialog => dialog.accept());
+  await page.locator('#import').setInputFiles(backupPath);
+  await expect(page.locator('#toast')).toHaveText('Progress restored.');
+  await page.locator('#grid .card').first().click();
+  await expect(page.locator('#notes')).toHaveValue('Backup evidence');
+
+  await page.locator('#import').setInputFiles({name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{broken')});
+  await expect(page.locator('#toast')).toHaveText('Could not import: choose a valid progress backup.');
+});
+
 test('dashboard uses accessible SVG icons instead of question-mark placeholders', async ({page}) => {
   await page.goto('/');
   await expect(page.locator('.brandmark use')).toHaveAttribute('href', '#icon-cluster');

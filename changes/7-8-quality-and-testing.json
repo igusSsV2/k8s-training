@@ -1,0 +1,6 @@
+{
+  "type": "added",
+  "description": "Add reproducible lint gates and CI release validation, plus browser coverage for progress backup export, restore and invalid-file handling.",
+  "issues": [7, 8],
+  "breaking": false
+}

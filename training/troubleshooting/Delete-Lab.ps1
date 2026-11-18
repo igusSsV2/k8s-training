@@ -15,8 +15,8 @@ try {
     else {
         Assert-LabCluster
         # Validate every target before beginning deletion.
-        foreach ($number in (Get-Scenarios $Scenario)) { Assert-OwnedNamespace "trouble-$number" -AllowMissing }
-        foreach ($number in (Get-Scenarios $Scenario)) {
+        foreach ($number in (Get-ScenarioNumber $Scenario)) { Assert-OwnedNamespace "trouble-$number" -AllowMissing }
+        foreach ($number in (Get-ScenarioNumber $Scenario)) {
             Write-LabStep "Deleting scenario $number namespace"
             $null = Invoke-LabKube @('delete', 'namespace', "trouble-$number", '--ignore-not-found', '--timeout=120s')
         }

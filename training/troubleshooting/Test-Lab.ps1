@@ -7,8 +7,8 @@ foreach ($script in Get-ChildItem -LiteralPath $PSScriptRoot -Filter *.ps1) {
     $null = [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$tokens, [ref]$errors)
     Assert-Lab ($errors.Count -eq 0) "PowerShell parses: $($script.Name)"
 }
-Assert-Lab ((Get-Scenarios All).Count -eq 3) 'All selects three scenarios'
-Assert-Lab ((Get-Scenarios 2)[0] -eq 2) 'Single-scenario selection stays isolated'
+Assert-Lab ((Get-ScenarioNumber All).Count -eq 3) 'All selects three scenarios'
+Assert-Lab ((Get-ScenarioNumber 2)[0] -eq 2) 'Single-scenario selection stays isolated'
 
 . "$PSScriptRoot/Prerequisites.ps1"
 Assert-PrerequisiteReport @([pscustomobject]@{Name='ready'; Ready=$true})
