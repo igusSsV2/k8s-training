@@ -1,0 +1,6 @@
+{
+  "type": "security",
+  "description": "Add scheduled and pull-request CodeQL scanning for maintained JavaScript sources, with a documented alert triage policy and PowerShell coverage limitation.",
+  "issues": [23],
+  "breaking": false
+}

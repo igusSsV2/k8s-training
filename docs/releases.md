@@ -63,6 +63,12 @@ metadata check must also pass before merge.
 If a PR is retargeted to a different base, push a new commit or rerun its application
 validation explicitly. Metadata edits never replace code checks with skipped jobs.
 
+**CodeQL** scans JavaScript/TypeScript on PRs to `main`, pushes to `main`, and a
+weekly schedule. It reports security findings but is not currently a required
+merge check; maintainers review alerts and triage them as described in the
+[security scanning guide](security.md). PowerShell lab scripts remain outside
+CodeQL coverage.
+
 **Publish versioned release** runs after a push/merge to `main` and can be rerun
 manually from Actions. It processes all merged PRs after the release baseline in
 Git ancestry order, including merges that arrived while another run was active.
