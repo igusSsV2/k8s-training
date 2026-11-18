@@ -34,17 +34,16 @@ if (-not (Test-Path -LiteralPath $actionlintPath)) {
 $moduleRoot = Join-Path $toolRoot 'Modules'
 $analyzerPath = Join-Path $moduleRoot 'PSScriptAnalyzer/1.24.0/PSScriptAnalyzer.psd1'
 if (-not (Test-Path -LiteralPath $analyzerPath)) {
-    $null = New-Item -ItemType Directory -Path $moduleRoot -Force
-    $cachedAnalyzer = Join-Path $repoRoot '.tools/psmodules/PSScriptAnalyzer/1.24.0'
-    if (Test-Path -LiteralPath $cachedAnalyzer) {
-        Copy-Item -LiteralPath $cachedAnalyzer -Destination (Join-Path $moduleRoot 'PSScriptAnalyzer/1.24.0') -Recurse
-    } else {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Force -Confirm:$false
-        $installedAnalyzer = Get-Module -ListAvailable PSScriptAnalyzer | Where-Object { $_.Version -eq [version]'1.24.0' } | Select-Object -First 1
-        if (-not $installedAnalyzer) { throw 'PSScriptAnalyzer 1.24.0 was installed but could not be located.' }
-        Copy-Item -LiteralPath $installedAnalyzer.ModuleBase -Destination (Join-Path $moduleRoot 'PSScriptAnalyzer/1.24.0') -Recurse
-    }
+    $analyzerDirectory = Split-Path $analyzerPath -Parent
+    $analyzerArchive = Join-Path $toolRoot 'PSScriptAnalyzer.1.24.0.zip'
+    $analyzerUrl = 'https://github.com/PowerShell/PSScriptAnalyzer/releases/download/1.24.0/PSScriptAnalyzer.1.24.0.nupkg'
+    $expectedAnalyzerHash = 'E86C97D44BB1BC8A1DE35E753B85EA1D938F6F9F881639A181507E079BCA4556'
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $analyzerUrl -OutFile $analyzerArchive -UseBasicParsing -TimeoutSec 180
+    $actualAnalyzerHash = (Get-FileHash -LiteralPath $analyzerArchive -Algorithm SHA256).Hash
+    if ($actualAnalyzerHash -ne $expectedAnalyzerHash) { Remove-Item -LiteralPath $analyzerArchive -Force; throw 'PSScriptAnalyzer archive checksum did not match the pinned release.' }
+    $null = New-Item -ItemType Directory -Path $analyzerDirectory -Force
+    Expand-Archive -LiteralPath $analyzerArchive -DestinationPath $analyzerDirectory -Force
+    Remove-Item -LiteralPath $analyzerArchive -Force
 }
 Write-Host 'Quality tools ready: yamllint 1.38.0, actionlint 1.7.12, PSScriptAnalyzer 1.24.0.'

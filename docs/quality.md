@@ -15,8 +15,9 @@ powershell -NoProfile -File scripts/quality/Setup-QualityTools.ps1
 ```
 
 The setup script creates a virtual environment and installs the pinned
-requirements in `requirements-quality.txt`, downloads actionlint 1.7.12 after
-verifying its published SHA-256 digest, and saves PSScriptAnalyzer 1.24.0 under
+requirements in `requirements-quality.txt`, downloads actionlint 1.7.12 and
+PSScriptAnalyzer 1.24.0 from their pinned GitHub releases after verifying each
+archive's SHA-256 digest, and saves both under
 the ignored `.tools/quality/` directory. Node tooling is locked by
 `package-lock.json`. Review upgrades and regenerate the lockfile when changing
 versions.
