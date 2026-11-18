@@ -1,0 +1,6 @@
+{
+  "type": "changed",
+  "description": "Explain kind's Docker node view, where Kubernetes workloads run, and how learners can verify the troubleshooting cluster with its dedicated kubeconfig.",
+  "issues": [29],
+  "breaking": false
+}
