@@ -7,7 +7,8 @@ if (!state.records || state.records.length !== 2) state = blank();
 let selected = 0;
 const titles = ['Meet your cluster','Scaling & self-healing','Services & discovery','Make it your own','Health & safe rollouts','Give your data a home','Access with intention','The incident challenge'];
 const descriptions = ['Find your bearings. Meet nodes, Pods, and the controllers that keep them running.','Watch Kubernetes replace a Pod and keep your desired state in balance.','Connect the dots with Services, selectors, and your first internal HTTP request.','Personalize your app with configuration and learn how practice Secrets work.','Break a deployment, read the clues, and bring it safely back to health.','Write a shared journal and discover what survives when a Pod disappears.','Give an observer just enough permission. Prove what is allowed and denied.','Put it all together. Three faults, two teammates, one recovered application.'];
-const icons = ['?','?','?','?','?','?','?','?'];
+const icons = ['box','scale','network','settings','activity','database','key','flag'];
+const svgIcon = (name,className='ui-icon') => `<svg class="${className}" aria-hidden="true" focusable="false"><use href="#icon-${name}"></use></svg>`;
 const criteria = ['I completed the hands-on tasks','The runtime validation passed','I recorded the manual acceptance evidence','I can explain this lab to my partner'];
 function record(i) { return state.records[state.learner][i] || {checks:[false,false,false,false],notes:''}; }
 function complete(i) { return record(i).checks.every(Boolean); }
@@ -20,7 +21,7 @@ function render() {
   $('count').innerHTML=done+' <span>/ 8 labs</span>';
   $('bar').style.width=(done/8*100)+'%';
   const next=titles.findIndex((_,i)=>!complete(i));
-  $('resume').textContent=done===8?'Revisit your journey ?':done?'Continue your journey ?':'Start your first lab ?';
+  $('resume-label').textContent=done===8?'Revisit your journey':done?'Continue your journey':'Start your first lab';
   $('milestone').textContent=done===8?'You built this.':next===0?'Hello, cluster.':titles[next];
   $('milestoneSub').textContent=done===8?'Eight labs complete. Keep exploring.':'Next up: lab '+String(next+1).padStart(2,'0');
   $('roles').textContent='Learner '+(state.driver+1)+' drives · Learner '+(2-state.driver)+' navigates';
@@ -28,7 +29,7 @@ function render() {
   titles.forEach((title,i)=>{
     const card=document.createElement('button');card.className='card';
     const started=record(i).checks.some(Boolean)||record(i).notes;
-    card.innerHTML='<div class="cardtop"><span class="icon">'+icons[i]+'</span><span class="badge '+(complete(i)?'done':'')+'">'+(complete(i)?'? Completed':started?'In progress':'Ready to explore')+'</span></div><h3>'+title+'</h3><p>'+descriptions[i]+'</p><div class="cardfoot"><span>LAB '+String(i+1).padStart(2,'0')+' · 60–90 MIN</span><b>'+(complete(i)?'Revisit lab':'Open lab')+' ?</b></div>';
+    card.innerHTML='<div class="cardtop"><span class="icon" aria-hidden="true">'+svgIcon(icons[i])+'</span><span class="badge '+(complete(i)?'done':'')+'">'+(complete(i)?svgIcon('check','badge-icon')+' Completed':started?'In progress':'Ready to explore')+'</span></div><h3>'+title+'</h3><p>'+descriptions[i]+'</p><div class="cardfoot"><span>LAB '+String(i+1).padStart(2,'0')+' · 60–90 MIN</span><b>'+(complete(i)?'Revisit lab':'Open lab')+svgIcon('arrow','card-arrow')+'</b></div>';
     card.onclick=()=>openLab(i);$('grid').append(card);
   });
 }

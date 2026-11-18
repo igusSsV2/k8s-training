@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Replace dashboard question-mark icon placeholders with accessible inline SVG symbols and preserve clear text labels.",
+  "issues": [31],
+  "breaking": false
+}

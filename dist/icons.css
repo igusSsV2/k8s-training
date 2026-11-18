@@ -1,0 +1,23 @@
+.icon-library{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.ui-icon{display:inline-block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.brandmark,.nav-icon,.small-icon,.button-icon,.close-icon,.badge-icon,.card-arrow{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brandmark{flex:none;width:29px;height:29px;color:var(--green)}
+.nav{display:flex;align-items:center;gap:9px}
+.nav-icon{flex:none;width:17px;height:17px}
+.orbit{display:block;height:34px}
+.orbit .ui-icon{width:34px;height:34px}
+#swap,#export{display:inline-flex;align-items:center;gap:4px}
+.small-icon{width:14px;height:14px}
+.primary #resume-label,.primary span{margin-left:0}
+.primary .button-icon{width:14px;height:14px;margin-left:24px}
+.icon .ui-icon{width:22px;height:22px}
+.badge{display:inline-flex;align-items:center;gap:4px}
+.badge-icon{width:12px;height:12px}
+.cardfoot b{display:inline-flex;align-items:center;gap:4px}
+.card-arrow{width:13px;height:13px}
+.core{display:grid;place-items:center}
+.hero-core-icon{width:52px;height:52px;color:#fff;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hero-node-icon{display:block;width:23px;height:23px;margin:6px auto 0;color:var(--green);fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#close{display:grid;place-items:center;width:36px;height:36px;padding:8px}
+.close-icon{display:block;width:18px;height:18px}
+footer span{display:inline-flex;align-items:center;gap:5px}
