@@ -67,6 +67,46 @@ klab get nodes
 klab get pods -A
 ```
 
+## What Docker Desktop should show
+
+This lab creates a single-node [kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
+cluster named `k8s-troubleshooting`. In Docker Desktop's **Containers** view,
+expect one running node container named `k8s-troubleshooting-control-plane`.
+That container is the Kubernetes node. Kubernetes runs the lab's Pod containers
+inside the node's own container runtime, so they may not appear as separate
+host-level Docker containers or images. Docker Desktop's built-in Kubernetes
+cluster is a separate option and does not need to be enabled for this lab.
+
+The dashboard starts actions and shows their output; it is not a Kubernetes
+resource browser. Use the lab's dedicated tools and kubeconfig from the repository
+root to inspect what is actually running:
+
+```powershell
+$kind = '.\.tools\k8s-troubleshooting\kind.exe'
+$kubectl = '.\.tools\k8s-troubleshooting\kubectl.exe'
+$kubeconfig = '.\.tools\k8s-troubleshooting\kubeconfig'
+$context = 'kind-k8s-troubleshooting'
+
+& $kind get clusters
+& $kubectl --kubeconfig $kubeconfig --context $context get nodes -o wide
+& $kubectl --kubeconfig $kubeconfig --context $context get namespaces
+& $kubectl --kubeconfig $kubeconfig --context $context get pods -A -o wide
+```
+
+Expect the cluster list to include `k8s-troubleshooting`, its node to be Ready,
+and namespaces `trouble-1`, `trouble-2`, and `trouble-3`. System Pods also appear
+in `kube-system`. The three incident namespaces should show the intended faults:
+Scenario 1 has a rollout that cannot replace the old version, Scenario 2 has
+Ready Pods that its Service cannot reach, and Scenario 3 has running Pods that
+are not Ready. The broken state is the starting point for the exercises.
+
+If the cluster or kubeconfig is missing, check that Docker Desktop is running
+Linux containers, then rerun setup from the repository root. Setup/deploy resets
+the selected incidents, so save any repairs you want to keep before rerunning it.
+The setup and cleanup commands below always use this dedicated kubeconfig; they
+do not configure Docker Desktop's built-in Kubernetes cluster or edit your
+default kubeconfig.
+
 ## Incident briefs (start here)
 
 ### 1. The release that never finishes

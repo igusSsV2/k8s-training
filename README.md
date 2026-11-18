@@ -94,6 +94,13 @@ web service; the PowerShell-only lab scripts work independently of it.
 | 2 | Healthy Pods cannot be reached through their Service | `trouble-2` |
 | 3 | Containers run but the application never becomes ready | `trouble-3` |
 
+Docker Desktop normally shows one running `k8s-troubleshooting-control-plane`
+container: this is the single kind node that hosts the Kubernetes cluster. The
+workload containers run inside that node and may not appear as separate Docker
+Desktop containers. Docker Desktop's own Kubernetes option is separate and is
+not needed. See the [troubleshooting guide](training/troubleshooting/README.md)
+for commands to inspect the cluster and workloads.
+
 A successful setup leaves the scenarios **deliberately broken** for you to repair.
 Read the [incident briefs and command guide](training/troubleshooting/README.md).
 
