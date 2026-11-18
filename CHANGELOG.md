@@ -8,17 +8,10 @@ This source file is an index, not an assertion that a development version has
 already been published. Reviewed entries in [changes/](changes/) are the source
 of release notes; the release job assigns their actual version and date.
 Generated history lives in release assets so publishing never needs a bot commit
-directly to `main`.
-
-## Unreleased
-
-- Detect and explain the historical-workflow release authorization requirement;
-  support a repository-only publishing credential and sanitized API diagnostics
-  ([#24](https://github.com/igusSsV2/k8s-training/issues/24)).
-
-- Label-driven version bumps, Windows ZIPs, checksums, validation workflows, and
-  generated release history ([#4](https://github.com/igusSsV2/k8s-training/issues/4),
-  [#10](https://github.com/igusSsV2/k8s-training/issues/10)).
+directly to `main`. This index intentionally has no manually maintained
+`Unreleased` section: the presence of a reviewed entry in `changes/` does not
+mean it has shipped. A change is released only when its dated history appears in
+a published GitHub Release.
 
 ## Delivered before release automation (unversioned)
 
