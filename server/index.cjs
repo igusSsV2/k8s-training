@@ -9,7 +9,7 @@ const root = path.resolve(__dirname, '..');
 const instance = createHash('sha256').update(root.toLowerCase()).digest('hex');
 const staticFiles = new Map([
   ['/', ['index.html', 'text/html']], ['/index.html', ['index.html', 'text/html']],
-  ['/style.css', ['style.css', 'text/css']], ['/control.css', ['control.css', 'text/css']],
+  ['/style.css', ['style.css', 'text/css']], ['/control.css', ['control.css', 'text/css']], ['/icons.css', ['icons.css', 'text/css']],
   ['/app.js', ['app.js', 'text/javascript']], ['/course.js', ['course.js', 'text/javascript']],
   ['/control.js', ['control.js', 'text/javascript']]
 ]);

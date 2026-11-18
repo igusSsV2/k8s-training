@@ -36,7 +36,7 @@ checkout. `-NoBrowser` starts it without opening a tab; `-Port 8789` selects ano
 port (use the same port consistently to retain browser-local learner progress).
 Startup diagnostics are written to ignored `.tools/frontend/`.
 
-![Lab controls with live PowerShell activity](docs/lab-controls.png)
+![Dashboard with corrected icons and local lab controls](docs/lab-controls.png)
 
 The webpage can check/install prerequisites, create the cluster, start/reset
 selected scenarios, validate intended faults or repairs, and confirm scoped

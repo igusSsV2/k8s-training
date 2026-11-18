@@ -44,10 +44,21 @@ test('guided lessons and learner journals remain usable', async ({page}) => {
   await expect(page.locator('#notes')).toHaveValue('My investigation evidence');
 });
 
+test('dashboard uses accessible SVG icons instead of question-mark placeholders', async ({page}) => {
+  await page.goto('/');
+  await expect(page.locator('.brandmark use')).toHaveAttribute('href', '#icon-cluster');
+  await expect(page.locator('.nav-icon')).toHaveCount(2);
+  await expect(page.locator('#grid .card .icon svg')).toHaveCount(8);
+  const iconText = await page.locator('.brandmark, .nav-icon, .orbit, #swap svg, #export svg, #resume svg, .heroart .core, .heroart .node svg, #grid .card .icon, #grid .card .card-arrow, footer svg, #close svg, #coach svg').allTextContents();
+  expect(iconText.join('')).not.toContain('?');
+  await expect(page.getByRole('button', {name: 'Start your first lab'})).toBeVisible();
+});
+
 test('static file preserves guided lessons and explains disabled lab controls', async ({page}) => {
   await page.goto(pathToFileURL(path.resolve(__dirname, '../../dist/index.html')).href);
   await expect(page.getByText('Static lessons only', {exact: true})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Check prerequisites', exact: true})).toBeDisabled();
+  await expect(page.locator('#grid .card .icon svg')).toHaveCount(8);
   await page.locator('#grid .card').first().click();
   await expect(page.locator('#modal')).toBeVisible();
 });

@@ -103,6 +103,9 @@ test('HTTP enforces local host/origin/token, validates actions and replays activ
   assert.equal(version.channel, 'development');
   assert.equal(version.changelog, '/changelog');
   assert.match(await (await fetch(`${origin}/changelog`)).text(), /# Changelog/);
+  const iconStyles = await fetch(`${origin}/icons.css`);
+  assert.equal(iconStyles.status, 200);
+  assert.match(await iconStyles.text(), /\.icon-library/);
   const headers = {'Content-Type': 'application/json', Origin: origin, 'X-Lab-Token': session.token};
   assert.equal((await fetch(`${origin}/.tools/kubeconfig`)).status, 404);
   const invalidHost = await new Promise((resolve, reject) => {
