@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Detect historical workflow-file publication that requires a scoped publishing credential before expensive validation. Support an expiring repository-only release token and report sanitized GitHub authorization errors without weakening branch protection.",
+  "issues": [24],
+  "breaking": false
+}

@@ -17,7 +17,14 @@ class GitHub {
       ...(bytes ? {body: bytes} : body ? {body: JSON.stringify(body)} : {}), signal: AbortSignal.timeout(60000)
     });
     if (optional && response.status === 404) return null;
-    if (!response.ok) throw new Error(`GitHub ${method} request failed (${response.status}) for ${route.split('?')[0]}.`);
+    if (!response.ok) {
+      let detail = '';
+      try {
+        const payload = await response.json();
+        if (typeof payload.message === 'string') detail = payload.message.replaceAll(this.token, '[redacted]').replace(/Bearer\s+\S+/gi, 'Bearer [redacted]').slice(0, 400);
+      } catch { /* Some GitHub errors have no JSON response body. */ }
+      throw new Error(`GitHub ${method} request failed (${response.status}) for ${route.split('?')[0]}.${detail ? ` ${detail}` : ''}`);
+    }
     return response.status === 204 ? null : response.json();
   }
 

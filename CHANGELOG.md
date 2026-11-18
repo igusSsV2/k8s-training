@@ -12,6 +12,10 @@ directly to `main`.
 
 ## Unreleased
 
+- Detect and explain the historical-workflow release authorization requirement;
+  support a repository-only publishing credential and sanitized API diagnostics
+  ([#24](https://github.com/igusSsV2/k8s-training/issues/24)).
+
 - Label-driven version bumps, Windows ZIPs, checksums, validation workflows, and
   generated release history ([#4](https://github.com/igusSsV2/k8s-training/issues/4),
   [#10](https://github.com/igusSsV2/k8s-training/issues/10)).
