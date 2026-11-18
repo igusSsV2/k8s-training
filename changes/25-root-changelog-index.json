@@ -1,0 +1,6 @@
+{
+  "type": "changed",
+  "description": "Keep the root changelog as a stable index and distinguish reviewed pending entries from successfully published release history.",
+  "issues": [25],
+  "breaking": false
+}
