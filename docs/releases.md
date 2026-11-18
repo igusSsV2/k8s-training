@@ -134,6 +134,9 @@ Published dated history is generated into release assets, rather than committing
 generated version changes directly to `main` or inventing release dates in a PR.
 The date in each generated section is the merged PR's UTC date; GitHub separately
 shows when the release was actually published. This keeps retries consistent.
+Do not add a manually maintained `Unreleased` list to the root index: reviewed
+entries in `changes/` remain pending until a real release is published, and the
+releases page links to the dated history after publication.
 
 ## Failure recovery
 
