@@ -66,8 +66,22 @@ async function uploadAssets(github, release, files) {
   }
 }
 
-function validateSource(source) {
+function prepareValidationSource(source, validatorRoot) {
+  // Catch-up releases may validate commits predating a validator bootstrap fix.
+  // Use the current bootstrap while keeping app sources/tests/config at the candidate commit.
+  const bootstrapRelative = path.join('scripts', 'quality', 'Setup-QualityTools.ps1');
+  const candidateBootstrap = path.join(source, bootstrapRelative);
+  const currentBootstrap = path.join(validatorRoot, bootstrapRelative);
+  if (!fs.existsSync(candidateBootstrap) || !fs.existsSync(currentBootstrap)) {
+    throw new Error('Release validation requires the quality-tool bootstrap in both the candidate and publisher source.');
+  }
+  fs.copyFileSync(currentBootstrap, candidateBootstrap);
+  console.log('Applied the current quality-tool bootstrap to the release validation source.');
+}
+
+function validateSource(source, validatorRoot = source) {
   console.log('VALIDATION ONLY: publication messages inside the following tests are simulated, not GitHub releases.');
+  prepareValidationSource(source, validatorRoot);
   const env = {...process.env}; delete env.GH_TOKEN; delete env.GITHUB_TOKEN;
   const options = {cwd: source, stdio: 'inherit', env};
   const npm = path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
@@ -88,7 +102,7 @@ async function preparePackage({root, metadata, notes, history}) {
   const sourceZip = path.join(work, 'source.zip');
   execFileSync('git', ['-C', root, 'archive', '--format=zip', '-o', sourceZip, metadata.sha]);
   execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-File', path.join(__dirname, 'Expand-Source.ps1'), '-Archive', sourceZip, '-Destination', source], {stdio: 'inherit'});
-  validateSource(source);
+  validateSource(source, root);
   const result = packageZip({root: source, output: path.join(work, 'assets'), metadata, changelog: changelogFor([notes, ...history]), published: true});
   await smokeZip({archive: result.archive, version: metadata.version, directory: path.join(work, 'smoke')});
   return result;
@@ -130,4 +144,4 @@ async function publish({root = path.resolve(__dirname, '../..'), github, prepare
 }
 
 if (require.main === module) publish().catch(error => { console.error(error.message); process.exitCode = 1; });
-module.exports = {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization};
+module.exports = {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization, prepareValidationSource, validateSource};

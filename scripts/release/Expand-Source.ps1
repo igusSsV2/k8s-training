@@ -3,4 +3,5 @@ param(
     [Parameter(Mandatory = $true)][string]$Destination
 )
 $ErrorActionPreference = 'Stop'
-Expand-Archive -LiteralPath $Archive -DestinationPath $Destination
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::ExtractToDirectory($Archive, $Destination)

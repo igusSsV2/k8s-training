@@ -8,7 +8,7 @@ const {createHash} = require('node:crypto');
 const {parseVersion, releaseLabel, bumpVersion, validateChange, metadataFrom, releaseNotes, changelogFor, planReleases} = require('../scripts/release/core.cjs');
 const {stagePackage, packageZip} = require('../scripts/release/package.cjs');
 const {readChanges} = require('../scripts/release/git.cjs');
-const {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization} = require('../scripts/release/publish.cjs');
+const {publish, candidatesSince, ensureTag, uploadAssets, associatedPulls, checkPublicationAuthorization, prepareValidationSource} = require('../scripts/release/publish.cjs');
 const {GitHub, API_VERSION} = require('../scripts/release/github.cjs');
 const {smokeZip} = require('../scripts/release/smoke.cjs');
 
@@ -17,6 +17,24 @@ const repository = 'igusSsV2/k8s-training';
 const change = {type: 'added', description: 'A useful feature.', issues: [4, 10], breaking: false};
 const metadata = {schema: 1, pr: 16, sha: 'a'.repeat(40), previousVersion: '0.0.0', version: '0.1.0', bump: 'minor', date: '2026-11-17'};
 function temporary() { return fs.mkdtempSync(path.join(os.tmpdir(), 'k8s release test ')); }
+
+test('catch-up release validation uses the current tool bootstrap and preserves candidate application files', () => {
+  const temp = temporary();
+  const current = path.join(temp, 'current');
+  const candidate = path.join(temp, 'candidate');
+  const relative = path.join('scripts', 'quality', 'Setup-QualityTools.ps1');
+  fs.mkdirSync(path.join(current, path.dirname(relative)), {recursive: true});
+  fs.mkdirSync(path.join(candidate, path.dirname(relative)), {recursive: true});
+  fs.writeFileSync(path.join(current, relative), 'current .NET bootstrap');
+  fs.writeFileSync(path.join(candidate, relative), 'historical Get-FileHash bootstrap');
+  fs.mkdirSync(path.join(candidate, 'dist'), {recursive: true});
+  fs.writeFileSync(path.join(candidate, 'dist', 'app.js'), 'candidate application');
+
+  prepareValidationSource(candidate, current);
+
+  assert.equal(fs.readFileSync(path.join(candidate, relative), 'utf8'), 'current .NET bootstrap');
+  assert.equal(fs.readFileSync(path.join(candidate, 'dist', 'app.js'), 'utf8'), 'candidate application');
+});
 
 test('GitHub authorization diagnostics expose the cause without exposing the token', async () => {
   const token = 'test-only-sensitive-token';

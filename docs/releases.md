@@ -82,6 +82,11 @@ It uploads all assets before publishing. Closing an unmerged PR never releases i
 A direct commit to `main` without a merged PR stops publishing with an actionable
 error; it is not assigned an invented release label.
 
+When catching up older candidates, validation uses the current quality-tool
+bootstrap from `main` while the application source, tests, and package contents
+remain tied to each candidate's merge commit. This lets a maintainer fix the
+validator without rewriting an already merged application commit.
+
 Required-check enforcement is a separate repository setting. Configure the three
 check names above when branch protection is available (issue #6/#15). On a private
 repository whose plan does not permit branch protection, checks still run and the
