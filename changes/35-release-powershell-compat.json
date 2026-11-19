@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Use .NET SHA-256 and ZIP APIs in quality-tool setup so the release validator works with its Windows PowerShell host.",
+  "issues": [35],
+  "breaking": false
+}
