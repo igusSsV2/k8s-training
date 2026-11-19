@@ -71,7 +71,9 @@ function validateSource(source) {
   const env = {...process.env}; delete env.GH_TOKEN; delete env.GITHUB_TOKEN;
   const options = {cwd: source, stdio: 'inherit', env};
   const npm = path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
-  for (const args of [['ci', '--ignore-scripts'], ['run', 'check'], ['test']]) execFileSync(process.execPath, [npm, ...args], options);
+  for (const args of [['ci', '--ignore-scripts']]) execFileSync(process.execPath, [npm, ...args], options);
+  execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-File', path.join(source, 'scripts/quality/Setup-QualityTools.ps1')], options);
+  for (const args of [['run', 'lint'], ['run', 'check'], ['test']]) execFileSync(process.execPath, [npm, ...args], options);
   execFileSync(process.execPath, [path.join(source, 'node_modules/@playwright/test/cli.js'), 'install', 'chromium'], options);
   execFileSync(process.execPath, [npm, 'run', 'test:browser'], options);
   for (const script of ['training/scripts/Test-Course.ps1', 'training/troubleshooting/Test-Lab.ps1']) {

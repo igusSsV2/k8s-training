@@ -5,6 +5,7 @@ const {StringDecoder} = require('node:string_decoder');
 const {actions, validateAction, commandFor} = require('./actions.cjs');
 
 function redact(text) {
+  // eslint-disable-next-line no-control-regex -- Strip terminal color codes before showing subprocess output.
   return String(text).replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
     .replace(/(?:gh[pousr]_[\w]+|github_pat_[\w]+)/g, '[redacted]')
     .replace(/((?:authorization|password|token|client-key-data|client-certificate-data|certificate-authority-data)\s*[:=]\s*)(?:Bearer\s+)?[^\s,;]+/gi, '$1[redacted]')

@@ -13,7 +13,7 @@ try {
     try { $instance = ([BitConverter]::ToString($hash.ComputeHash([Text.Encoding]::UTF8.GetBytes($PSScriptRoot.ToLowerInvariant())))).Replace('-', '').ToLowerInvariant() }
     finally { $hash.Dispose() }
     $existing = $null
-    try { $existing = Invoke-RestMethod -Uri "$address/api/health" -TimeoutSec 2 } catch { }
+    try { $existing = Invoke-RestMethod -Uri "$address/api/health" -TimeoutSec 2 } catch { $existing = $null }
     if ($existing -and ($existing.application -ne 'kube-together' -or $existing.instance -ne $instance)) {
         throw "Port $Port belongs to another application/checkout. Use -Port with a different port."
     }
@@ -26,7 +26,7 @@ try {
         $deadline = (Get-Date).AddSeconds(20)
         do {
             Start-Sleep -Milliseconds 300
-            try { $existing = Invoke-RestMethod -Uri "$address/api/health" -TimeoutSec 2 } catch { }
+            try { $existing = Invoke-RestMethod -Uri "$address/api/health" -TimeoutSec 2 } catch { $existing = $null }
             if ($child.HasExited) { throw "Local service stopped. Inspect .tools/frontend/server-$Port.error.log (the port may be occupied)." }
         } while (-not $existing -and (Get-Date) -lt $deadline)
         if (-not $existing -or $existing.instance -ne $instance) { throw 'The local service did not become ready. Inspect .tools/frontend logs.' }

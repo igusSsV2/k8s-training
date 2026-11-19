@@ -20,11 +20,11 @@ steps in the entry and relevant documentation. Never edit or reuse an already
 merged entry for a different change; add another file. Unrelated labels may
 coexist with the single bump label.
 
-| Label | Previous 1.2.3 | Result |
-| --- | --- | --- |
-| `major` | 1.2.3 | 2.0.0 |
-| `minor` | 1.2.3 | 1.3.0 |
-| `patch` | 1.2.3 | 1.2.4 |
+| Label   | Previous 1.2.3 | Result |
+| ------- | -------------- | ------ |
+| `major` | 1.2.3          | 2.0.0  |
+| `minor` | 1.2.3          | 1.3.0  |
+| `patch` | 1.2.3          | 1.2.4  |
 
 `release-policy.json` anchors the start of automation at the final commit before
 these workflows were introduced. Earlier training work is described accurately

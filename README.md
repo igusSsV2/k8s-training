@@ -88,11 +88,11 @@ Allow about 4 CPU cores, 8 GB RAM, 15 GB disk and public internet access.
 No cloud account or application build is needed. Node is required for the local
 web service; the PowerShell-only lab scripts work independently of it.
 
-| Scenario | Incident | Namespace |
-| --- | --- | --- |
-| 1 | A release is stuck while the old version still serves traffic | `trouble-1` |
-| 2 | Healthy Pods cannot be reached through their Service | `trouble-2` |
-| 3 | Containers run but the application never becomes ready | `trouble-3` |
+| Scenario | Incident                                                      | Namespace   |
+| -------- | ------------------------------------------------------------- | ----------- |
+| 1        | A release is stuck while the old version still serves traffic | `trouble-1` |
+| 2        | Healthy Pods cannot be reached through their Service          | `trouble-2` |
+| 3        | Containers run but the application never becomes ready        | `trouble-3` |
 
 Docker Desktop normally shows one running `k8s-troubleshooting-control-plane`
 container: this is the single kind node that hosts the Kubernetes cluster. The
@@ -138,6 +138,14 @@ controls execute the standalone troubleshooting scripts through the local servic
 
 ## Repository and validation
 
+The [quality guide](docs/quality.md) documents lint, formatting, spelling and
+PowerShell test tools. Run `npm ci`, install Chromium with
+`npx playwright install chromium`, prepare pinned quality tools with
+`powershell -NoProfile -File scripts/quality/Setup-QualityTools.ps1`, then use
+`npm run lint` and the test commands below. CI reports a separate **Quality
+checks** status; release packaging reruns the same lint and regression checks
+against the exact source commit before creating assets.
+
 Dependency and GitHub Actions updates use [Dependabot](docs/dependencies.md), with
 weekly reviewed PRs and no automatic merging. Maintainers add an issue/changelog
 entry and run the same applicable validation before merging an update.
@@ -180,10 +188,8 @@ After editing guided lessons or SETUP.md, regenerate the checked-in bundle:
 node training/scripts/Sync-Course.cjs
 ```
 
-PowerShell parsing and YAML whitespace checks provide basic linting; no external
-formatter or linter is required. Formatting conventions are in `.editorconfig`.
-`npm run check` is syntax validation; broader lint/spelling tooling is tracked in
-issue #7. Browser tests use a separate local service on port 8788 with deterministic
+Formatting conventions are in `.editorconfig`; `npm run check` is JavaScript
+syntax validation. Browser tests use a separate local service on port 8788 with deterministic
 child-process fixtures; they do not modify your real cluster. Failed-browser
 traces are saved under ignored `.tools/browser-test-results/`.
 HTTP/process tests verify parameter validation, origin/token checks, streaming,
