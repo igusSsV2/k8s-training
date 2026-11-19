@@ -21,6 +21,8 @@ archive's SHA-256 digest, and saves both under
 the ignored `.tools/quality/` directory. Node tooling is locked by
 `package-lock.json`. Review upgrades and regenerate the lockfile when changing
 versions.
+The bootstrap uses .NET SHA-256 and ZIP APIs so checksum verification and
+extraction work in the Windows PowerShell host used by release validation.
 
 PSScriptAnalyzer omits only `PSAvoidUsingWriteHost`, because these scripts use
 terminal output for learner-facing progress. The PowerShell regression fixture
