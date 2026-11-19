@@ -3,4 +3,5 @@ param(
     [Parameter(Mandatory = $true)][string]$Destination
 )
 $ErrorActionPreference = 'Stop'
-Compress-Archive -LiteralPath $Source -DestinationPath $Destination -CompressionLevel Optimal
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory($Source, $Destination, [System.IO.Compression.CompressionLevel]::Optimal, $true)
