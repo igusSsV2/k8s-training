@@ -1,6 +1,6 @@
 {
   "type": "fixed",
-  "description": "Use .NET SHA-256 and ZIP APIs in quality-tool setup, and let the release validator catch up older pending commits with the current bootstrap while preserving each candidate's application source.",
+  "description": "Use .NET SHA-256 and ZIP APIs in quality-tool setup so the release validator works with its Windows PowerShell host.",
   "issues": [35],
   "breaking": false
 }

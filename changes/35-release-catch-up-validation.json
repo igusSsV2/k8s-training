@@ -1,0 +1,6 @@
+{
+  "type": "fixed",
+  "description": "Validate older pending release candidates with the current quality bootstrap while preserving each candidate's application source, tests, and package contents.",
+  "issues": [35],
+  "breaking": false
+}
